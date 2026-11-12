@@ -1,0 +1,18 @@
+FROM node:24-bookworm-slim
+
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends nginx gettext-base ca-certificates && \
+    rm -rf /var/lib/apt/lists/* /etc/nginx/sites-enabled/default
+
+WORKDIR /opt/weknora/frontend
+COPY package.json package-lock.json ./
+RUN npm ci --registry="$NPM_REGISTRY"
+
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+COPY nginx-api-proxy.conf /etc/nginx/api-proxy.conf
+COPY nginx-http.conf /etc/nginx/conf.d/00-weknora-http.conf
+COPY docker-entrypoint.sh /usr/local/bin/weknora-frontend-entrypoint
+
+EXPOSE 80
+CMD ["bash", "/source/deploy/run-frontend-source.sh"]

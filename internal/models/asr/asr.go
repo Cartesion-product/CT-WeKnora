@@ -88,6 +88,10 @@ func ConfigFromModel(m *types.Model) *Config {
 
 // NewASR creates an ASR instance based on the provided configuration.
 func NewASR(config *Config) (ASR, error) {
+	if config != nil && config.Source == types.ModelSourceLocal {
+		a, err := newOllamaASR(config)
+		return wrapASRLangfuse(a, err)
+	}
 	a, err := newASR(config)
 	return wrapASRLangfuse(a, err)
 }

@@ -1,0 +1,82 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.app-source
+      args:
+        WEKNORA_VERSION: ${WEKNORA_VERSION:-latest}
+        GOPROXY: ${GOPROXY:-https://goproxy.cn}
+    env_file: .env
+    volumes:
+      - /home/chitong_application/CT-WeKnora:/source:ro
+      - type: bind
+        source: /home/chitong_application/CT-WeKnora/config/config.yaml
+        target: /app/config/config.yaml
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /home/chitong_application/CT-WeKnora/config/builtin_models.yaml
+        target: /app/config/builtin_models.yaml
+        read_only: true
+        bind:
+          create_host_path: false
+      - /home/chitong_application/CT-WeKnora/data/files:/data/files
+      - docreader-tmp:/tmp/docreader:ro
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      docreader:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10m
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../deploy/Dockerfile.frontend-source
+      args:
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmmirror.com}
+    environment:
+      APP_HOST: app
+      APP_PORT: 8080
+      MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-50}
+      MAX_SKILL_BUNDLE_SIZE_MB: ${MAX_SKILL_BUNDLE_SIZE_MB:-256}
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-zh-CN}
+    ports:
+      - "${FRONTEND_PORT:-8900}:80"
+    volumes:
+      - /home/chitong_application/CT-WeKnora/frontend:/source/frontend:ro
+      - /home/chitong_application/CT-WeKnora/deploy:/source/deploy:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  docreader:
+    image: wechatopenai/weknora-docreader:${WEKNORA_VERSION:-latest}
+    env_file: .env
+    environment:
+      DOCREADER_IMAGE_OUTPUT_DIR: /tmp/docreader
+    entrypoint: ["bash", "/source/deploy/run-docreader-source.sh"]
+    volumes:
+      - /home/chitong_application/CT-WeKnora/docreader:/source/docreader:ro
+      - /home/chitong_application/CT-WeKnora/deploy:/source/deploy:ro
+      - docreader-tmp:/tmp/docreader
+    expose:
+      - "50051"
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr=localhost:50051"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 2m
+    restart: unless-stopped
+
+volumes:
+  docreader-tmp:

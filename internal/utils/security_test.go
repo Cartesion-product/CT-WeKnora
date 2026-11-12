@@ -234,6 +234,10 @@ func TestSSRFWhitelistExtraMerge(t *testing.T) {
 		{name: "main only does not match extra host", main: "internal", extra: "", host: "searxng", want: false},
 		{name: "both merged - main host", main: "internal", extra: "searxng", host: "internal", want: true},
 		{name: "both merged - extra host", main: "internal", extra: "searxng", host: "searxng", want: true},
+		{name: "extra 10/8 CIDR", main: "internal", extra: "10.0.0.0/8", host: "10.42.0.5", want: true},
+		{name: "extra 172.16/12 CIDR", main: "internal", extra: "172.16.0.0/12", host: "172.20.0.5", want: true},
+		{name: "extra 192.168/16 CIDR", main: "internal", extra: "192.168.0.0/16", host: "192.168.2.55", want: true},
+		{name: "outside extra private CIDR", main: "internal", extra: "192.168.0.0/16", host: "192.169.2.55", want: false},
 		{name: "neither matches unrelated host", main: "internal", extra: "searxng", host: "evil.example", want: false},
 	}
 

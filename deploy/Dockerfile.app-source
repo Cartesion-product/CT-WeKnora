@@ -1,0 +1,21 @@
+ARG WEKNORA_VERSION=latest
+FROM wechatopenai/weknora-app:${WEKNORA_VERSION}
+
+COPY --from=golang:1.26-bookworm /usr/local/go /usr/local/go
+ARG GOPROXY=https://goproxy.cn
+ENV PATH="/usr/local/go/bin:${PATH}" \
+    GOMODCACHE=/opt/weknora/go-mod-cache \
+    GOPROXY=${GOPROXY}
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libsqlite3-dev pkg-config git && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /home/appuser/.cache/go-build /home/appuser/go/pkg/mod && \
+    chown -R appuser:appuser /home/appuser/.cache /home/appuser/go
+
+WORKDIR /build-cache
+COPY go.mod go.sum ./
+COPY third_party/anydoc-go/go.mod third_party/anydoc-go/go.mod
+RUN go mod download && chmod -R a+rX "$GOMODCACHE"
+
+WORKDIR /app
+CMD ["bash", "/source/deploy/run-app-source.sh"]

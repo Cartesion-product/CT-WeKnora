@@ -1,0 +1,49 @@
+builtin_models:
+  - id: ct-weknora-chat
+    type: KnowledgeQA
+    source: remote
+    is_default: true
+    name: ${LLM_MODEL_NAME}
+    parameters:
+      base_url: ${LLM_BASE_URL}
+      api_key: ${LLM_API_KEY}
+      provider: aliyun
+      supports_vision: true
+
+  - id: ct-weknora-vision
+    type: VLLM
+    source: remote
+    is_default: true
+    name: ${LLM_MODEL_NAME}
+    parameters:
+      base_url: ${LLM_BASE_URL}
+      api_key: ${LLM_API_KEY}
+      provider: aliyun
+      supports_vision: true
+
+  - id: ct-weknora-embedding
+    type: Embedding
+    source: local
+    is_default: true
+    name: ${EMBEDDING_MODEL_NAME}
+    parameters:
+      embedding_parameters:
+        dimension: 1024
+
+  - id: ct-weknora-rerank
+    type: Rerank
+    source: remote
+    is_default: true
+    name: ${RERANK_MODEL_NAME}
+    parameters:
+      base_url: ${RERANK_BASE_URL}
+      provider: generic
+
+  - id: ct-weknora-asr
+    type: ASR
+    source: local
+    is_default: true
+    name: frozenlab/qwen3-asr:1.7b
+    parameters:
+      base_url: ${OLLAMA_BASE_URL}
+      provider: generic
