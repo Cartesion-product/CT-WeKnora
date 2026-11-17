@@ -594,7 +594,9 @@ const persistLoginResponse = async (response: any, skipRedirect = false) => {
   await authStore.refreshFromAuthMe()
   await nextTick()
   if (skipRedirect) return
-  router.replace(authStore.hasValidTenant ? '/platform/knowledge-bases' : '/onboarding/workspace')
+  const graphRedirect = typeof route.query.redirect === 'string' && /^\/graphs(?:\/|\?|$)/.test(route.query.redirect)
+    ? route.query.redirect : null
+  router.replace(authStore.hasValidTenant ? (graphRedirect || '/platform/knowledge-bases') : '/onboarding/workspace')
 }
 
 const getBackendOIDCRedirectURI = () => `${window.location.origin}${getApiBaseUrl()}/api/v1/auth/oidc/callback`
@@ -759,6 +761,9 @@ const handleRegister = async () => {
 
 // Check if already logged in; for lite edition, attempt transparent auto-setup
 onMounted(async () => {
+  if (typeof route.query.email === 'string' && !formData.email) {
+    formData.email = route.query.email
+  }
   // Share-link landing: ?token=xxx switches the form into invite-
   // register mode before any other auto-flow (logged-in redirect /
   // auto-setup / OIDC) gets a chance to redirect. Resolution failure
@@ -805,7 +810,9 @@ onMounted(async () => {
   }
 
   if (authStore.isLoggedIn) {
-    router.replace('/platform/knowledge-bases')
+    const graphRedirect = typeof route.query.redirect === 'string' && /^\/graphs(?:\/|\?|$)/.test(route.query.redirect)
+      ? route.query.redirect : null
+    router.replace(graphRedirect || '/platform/knowledge-bases')
     return
   }
 

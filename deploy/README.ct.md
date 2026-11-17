@@ -24,7 +24,19 @@ docker compose -f docker-compose.ct.yml logs -f app
 
 The image build downloads Go and npm dependencies. The defaults use `https://goproxy.cn` and `https://registry.npmmirror.com` because the Docker host may not reach the upstream registries. Override `GOPROXY` or `NPM_REGISTRY` in `.env` if your server uses different mirrors.
 
-Visit `http://192.168.1.128:8900`. On first boot, register `shin@qcznai.com`; the configured bootstrap admin email promotes that account at application startup. Restart `app` after registration, then set `DISABLE_REGISTRATION=true` in `.env` and recreate the app:
+Visit `http://192.168.2.55:8900`. On first boot, register `shin@qcznai.com`; the configured bootstrap admin email promotes that account at application startup. Restart `app` after registration, then set `DISABLE_REGISTRATION=true` in `.env` and recreate the app:
+
+The read-only graph portal is at `http://192.168.2.55:8900/graphs`. It uses the normal WeKnora account and server-side knowledge-base permissions. It lists only accessible knowledge bases with Wiki indexing enabled and opens their Wiki page-link graph. A direct link to `/graphs/<knowledge-base-id>` opens a particular graph after login. This is the Wiki link graph, not the Neo4j entity-relationship extraction graph. External systems may link to this page or embed it in an iframe. For a cross-origin iframe, set `GRAPH_FRAME_ORIGINS` in `.env` to the exact parent origin, for example `GRAPH_FRAME_ORIGINS=https://portal.example.com`, then rebuild and recreate `frontend`; multiple origins can be space-separated. The default permits same-origin framing only. The parent origin must use HTTPS if the parent page uses HTTPS. Browser third-party storage policy can still affect login inside an iframe, so test the target browsers before relying on this integration.
+
+To preview local frontend changes from other devices on the LAN, build the frontend and run this from `frontend/` in PowerShell. The preview binds to all local interfaces and proxies API calls to the deployed server:
+
+```powershell
+$env:VITE_DEV_PROXY_TARGET = 'http://192.168.2.55:8900'
+npm run build
+npm run preview -- --host 0.0.0.0 --port 5184 --strictPort
+```
+
+Open `http://192.168.1.128:5184/graphs` from a device that can reach the Windows host. Allow inbound TCP 5184 in the Windows firewall if another device cannot connect.
 
 ```bash
 docker compose -f docker-compose.ct.yml restart app

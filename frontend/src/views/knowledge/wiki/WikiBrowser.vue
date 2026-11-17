@@ -738,7 +738,7 @@
                   <t-icon name="arrow-right-circle" style="margin-right: 4px;" />{{
                     $t('knowledgeEditor.wikiBrowser.issueGoFix') }}
                 </span>
-                <span class="wiki-issue-popup-action" style="color: var(--td-text-color-placeholder);"
+                <span v-if="props.canEdit" class="wiki-issue-popup-action" style="color: var(--td-text-color-placeholder);"
                   @click="handleGlobalIssueIgnore(issue.id)">{{ $t('knowledgeEditor.wikiBrowser.issueIgnore') }}</span>
               </div>
             </div>
@@ -1118,6 +1118,7 @@ async function navigateToSlugAndFix(slug: string) {
 }
 
 async function handleGlobalIssueIgnore(issueId: string) {
+  if (!props.canEdit) return
   try {
     await updateWikiIssueStatus(props.knowledgeBaseId, issueId, 'ignored')
     // Refresh list

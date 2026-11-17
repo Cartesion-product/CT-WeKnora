@@ -33,7 +33,16 @@ export MAX_SKILL_BUNDLE_SIZE=${SKILL_MB}M
 export APP_HOST=${APP_HOST:-app}
 export APP_PORT=${APP_PORT:-8080}
 export APP_SCHEME=${APP_SCHEME:-http}
-envsubst '${MAX_FILE_SIZE} ${MAX_SKILL_BUNDLE_SIZE} ${APP_HOST} ${APP_PORT} ${APP_SCHEME}' \
+GRAPH_FRAME_ANCESTORS="'self'"
+for origin in ${GRAPH_FRAME_ORIGINS:-}; do
+  if ! printf '%s' "$origin" | grep -Eq '^https?://[A-Za-z0-9.-]+(:[0-9]{1,5})?$'; then
+    echo "Invalid GRAPH_FRAME_ORIGINS entry: $origin" >&2
+    exit 1
+  fi
+  GRAPH_FRAME_ANCESTORS="$GRAPH_FRAME_ANCESTORS $origin"
+done
+export GRAPH_FRAME_ANCESTORS
+envsubst '${MAX_FILE_SIZE} ${MAX_SKILL_BUNDLE_SIZE} ${APP_HOST} ${APP_PORT} ${APP_SCHEME} ${GRAPH_FRAME_ANCESTORS}' \
   < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
 
 # 启动 nginx

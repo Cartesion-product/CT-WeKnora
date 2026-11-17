@@ -92,6 +92,12 @@ const router = createRouter({
       meta: { requiresInit: true, requiresAuth: true }
     },
     {
+      path: "/graphs/:kbId?",
+      name: "graphPortal",
+      component: () => import("../views/knowledge/GraphPortal.vue"),
+      meta: { requiresInit: true, requiresAuth: true }
+    },
+    {
       path: "/platform",
       name: "Platform",
       redirect: "/platform/knowledge-bases",
@@ -372,7 +378,9 @@ router.beforeEach(async (to, from, next) => {
           // Auto-setup may be unavailable outside the native Lite shell.
         }
       }
-      next('/login')
+      next(to.path.startsWith('/graphs')
+        ? { path: '/login', query: { redirect: to.fullPath, email: 'shin@qcznai.com' } }
+        : '/login')
       return
     }
   }
