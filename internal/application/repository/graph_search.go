@@ -51,7 +51,51 @@ func (r *graphSearchEvidenceRepository) GetGraphSourceChunks(
 		rows[i].Content, rows[i].ContentTruncated = graphSearchClip(rows[i].Content, types.GraphSearchMaxContentRunes)
 		rows[i].Title, rows[i].TitleTruncated = graphSearchClip(rows[i].Title, 512)
 	}
+	if err := r.attachGraphVideoMedia(ctx, rows); err != nil {
+		return nil, err
+	}
 	return rows, nil
+}
+
+func (r *graphSearchEvidenceRepository) attachGraphVideoMedia(ctx context.Context, rows []types.GraphSearchSourceChunk) error {
+	if len(rows) == 0 {
+		return nil
+	}
+	ids := make([]string, 0, len(rows))
+	for _, row := range rows {
+		ids = append(ids, row.ID)
+	}
+	type mediaRow struct {
+		ChunkID    string
+		SegmentID  string
+		RunID      string
+		EvidenceID string
+		Modality   string
+		StartMS    *int64
+		EndMS      *int64
+		FrameMS    *int64
+	}
+	var mediaRows []mediaRow
+	if err := r.db.WithContext(ctx).Table("video_segments AS segment").
+		Select("segment.chunk_id, segment.id AS segment_id, segment.run_id, evidence.id AS evidence_id, evidence.modality, evidence.start_ms, evidence.end_ms, evidence.frame_ms").
+		Joins("JOIN video_assets AS asset ON asset.knowledge_id = segment.knowledge_id AND asset.tenant_id = segment.tenant_id AND asset.active_run_id = segment.run_id").
+		Joins("JOIN video_evidences AS evidence ON evidence.segment_id = segment.id AND evidence.run_id = segment.run_id").
+		Where("segment.chunk_id IN ?", ids).Order("segment.chunk_id, evidence.modality, evidence.id").Scan(&mediaRows).Error; err != nil {
+		return err
+	}
+	byChunk := make(map[string]*types.MediaReference, len(mediaRows))
+	for _, row := range mediaRows {
+		if _, exists := byChunk[row.ChunkID]; exists {
+			continue
+		}
+		byChunk[row.ChunkID] = &types.MediaReference{Type: "video", SegmentID: row.SegmentID,
+			EvidenceID: row.EvidenceID, Modality: row.Modality, ProcessingRunID: row.RunID,
+			StartMS: row.StartMS, EndMS: row.EndMS, FrameMS: row.FrameMS}
+	}
+	for i := range rows {
+		rows[i].Media = byChunk[rows[i].ID]
+	}
+	return nil
 }
 
 func graphSearchClip(text string, limit int) (string, bool) {

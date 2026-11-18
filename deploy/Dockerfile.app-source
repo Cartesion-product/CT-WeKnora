@@ -7,7 +7,7 @@ ENV PATH="/usr/local/go/bin:${PATH}" \
     GOMODCACHE=/opt/weknora/go-mod-cache \
     GOPROXY=${GOPROXY}
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends libsqlite3-dev pkg-config git && \
+    apt-get install -y --no-install-recommends libsqlite3-dev pkg-config git ffmpeg tesseract-ocr tesseract-ocr-chi-sim && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /home/appuser/.cache/go-build /home/appuser/go/pkg/mod && \
     chown -R appuser:appuser /home/appuser/.cache /home/appuser/go

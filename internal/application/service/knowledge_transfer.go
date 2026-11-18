@@ -172,6 +172,16 @@ func (s *knowledgeService) planKnowledgeMove(
 		if err := validateMoveItem(ctx, row, source, target, mode); err != nil {
 			return nil, err
 		}
+		if IsVideoType(row.FileType) && s.db != nil {
+			var asset types.VideoAsset
+			if err := s.db.WithContext(ctx).Where("tenant_id = ? AND knowledge_id = ?", row.TenantID, row.ID).
+				First(&asset).Error; err != nil {
+				return nil, err
+			}
+			if asset.ActiveRunID == "" || asset.CurrentRunID != asset.ActiveRunID {
+				return nil, fmt.Errorf("video %s must finish processing before moving", row.ID)
+			}
+		}
 		allowed := []string{row.KnowledgeBaseID}
 		state, _ := transferState(row)
 		if matchesTransfer(ctx, state, source, target, access.KBTransferMove, row.ID, mode) && state.Phase == "moving" {
@@ -211,6 +221,16 @@ func (s *knowledgeService) planKnowledgeMove(
 func validateMoveItem(ctx context.Context, k *types.Knowledge, source, target *types.KnowledgeBase, mode string) error {
 	if k == nil || k.TenantID != source.TenantID {
 		return access.ErrForbidden
+	}
+	if IsVideoType(k.FileType) {
+		if mode != "reuse_vectors" {
+			return fmt.Errorf("video %s requires reuse_vectors move mode", k.ID)
+		}
+		if source.GetStorageProvider() != target.GetStorageProvider() ||
+			(source.StorageBackendID == nil) != (target.StorageBackendID == nil) ||
+			(source.StorageBackendID != nil && *source.StorageBackendID != *target.StorageBackendID) {
+			return fmt.Errorf("video %s cannot move across storage backends", k.ID)
+		}
 	}
 	state, err := transferState(k)
 	if err != nil {

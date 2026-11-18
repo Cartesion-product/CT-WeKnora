@@ -531,6 +531,34 @@
         </div>
       </div>
 
+      <!-- 视频解析 -->
+      <div v-if="!isFAQ" v-show="currentSection === 'video'" class="section">
+        <div v-if="formData" class="kb-multimodal-settings">
+          <div class="section-header">
+            <h2>{{ $t('videoKnowledge.parseTitle') }}</h2>
+            <p class="section-description">{{ $t('videoKnowledge.parseDescription') }}</p>
+          </div>
+          <div class="settings-group">
+            <div class="setting-row">
+              <div class="setting-info"><label>{{ $t('videoKnowledge.frameInterval') }}</label></div>
+              <div class="setting-control"><t-input-number v-model="formData.videoConfig.frameIntervalSeconds" :min="1" :max="60" :step="1" theme="normal" :style="{ width: '112px' }" /></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info"><label>{{ $t('videoKnowledge.maxFrames') }}</label></div>
+              <div class="setting-control"><t-input-number v-model="formData.videoConfig.maxFrames" :min="1" :max="300" :step="1" theme="normal" :style="{ width: '112px' }" /></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info"><label>{{ $t('videoKnowledge.ocrLanguage') }}</label></div>
+              <div class="setting-control"><t-select v-model="formData.videoConfig.ocrLanguage" :style="{ width: '160px' }">
+                <t-option value="chi_sim+eng" :label="$t('videoKnowledge.ocrChineseEnglish')" />
+                <t-option value="chi_sim" :label="$t('videoKnowledge.ocrChinese')" />
+                <t-option value="eng" :label="$t('videoKnowledge.ocrEnglish')" />
+              </t-select></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 知识图谱 -->
       <div v-if="!isFAQ && currentSection === 'graph'" class="section">
         <GraphSettings
@@ -836,6 +864,7 @@ const navItems = computed(() => {
       { key: 'parser', icon: 'file-search', label: t('settings.parserEngine') },
       { key: 'multimodal', icon: 'image', label: t('knowledgeEditor.sidebar.multimodal') },
       { key: 'asr', icon: 'sound', label: t('knowledgeEditor.sidebar.asr') },
+      { key: 'video', icon: 'video', label: t('videoKnowledge.tab') },
       { key: 'storage', icon: 'cloud', label: t('knowledgeEditor.sidebar.storage') },
       { key: 'chunking', icon: 'file-copy', label: t('knowledgeEditor.sidebar.chunking') },
       { key: 'graph', icon: 'chart-bubble', label: t('knowledgeEditor.sidebar.graph') },
@@ -868,7 +897,7 @@ const navGroups = computed(() => {
     {
       key: 'processing',
       label: t('knowledgeEditor.navGroups.processing'),
-      items: pickItems(['parser', 'chunking', 'multimodal', 'asr', 'graph', 'advanced']),
+      items: pickItems(['parser', 'chunking', 'multimodal', 'asr', 'video', 'graph', 'advanced']),
     },
     {
       key: 'data',
@@ -1005,6 +1034,7 @@ const initFormData = (type: 'document' | 'faq' = 'document') => {
       modelId: '',
       language: ''
     },
+    videoConfig: { frameIntervalSeconds: 15, maxFrames: 120, ocrLanguage: 'chi_sim+eng' },
     nodeExtractConfig: {
       enabled: false,
       text: '',
@@ -1177,6 +1207,11 @@ const loadKBData = async (
         enabled: !!kb.asr_config?.enabled,
         modelId: kb.asr_config?.model_id || '',
         language: kb.asr_config?.language || ''
+      },
+      videoConfig: {
+        frameIntervalSeconds: kb.video_config?.frame_interval_seconds ?? 15,
+        maxFrames: kb.video_config?.max_frames ?? 120,
+        ocrLanguage: kb.video_config?.ocr_language || 'chi_sim+eng'
       },
       nodeExtractConfig: {
         enabled: kb.extract_config?.enabled || false,
@@ -1538,6 +1573,17 @@ const validateForm = (): boolean => {
     return false
   }
 
+  if (formData.value.type !== 'faq') {
+    const { frameIntervalSeconds, maxFrames, ocrLanguage } = formData.value.videoConfig
+    if (!Number.isInteger(frameIntervalSeconds) || frameIntervalSeconds < 1 || frameIntervalSeconds > 60 ||
+        !Number.isInteger(maxFrames) || maxFrames < 1 || maxFrames > 300 ||
+        !['eng', 'chi_sim', 'chi_sim+eng'].includes(ocrLanguage)) {
+      MessagePlugin.warning(t('videoKnowledge.invalidConfig'))
+      currentSection.value = 'video'
+      return false
+    }
+  }
+
   return true
 }
 
@@ -1617,6 +1663,11 @@ const buildSubmitData = () => {
       ? (formData.value.asrConfig?.modelId || '')
       : '',
     language: formData.value.asrConfig?.language || ''
+  }
+  data.video_config = {
+    frame_interval_seconds: formData.value.videoConfig.frameIntervalSeconds,
+    max_frames: formData.value.videoConfig.maxFrames,
+    ocr_language: formData.value.videoConfig.ocrLanguage
   }
 
   // storage_backend_id is authoritative. Keep provider projection for old clients
@@ -1806,6 +1857,7 @@ const doSubmit = async () => {
       if (data.image_processing_config) {
         updateConfig.image_processing_config = data.image_processing_config
       }
+      updateConfig.video_config = data.video_config
       await updateKnowledgeBase(kbId, {
         name: data.name,
         description: data.description,

@@ -87,7 +87,8 @@ type KnowledgeBase struct {
 	// VLM config
 	VLMConfig VLMConfig `yaml:"vlm_config"              json:"vlm_config"              gorm:"type:json" extensions:"x-agent,x-agent-detail"`
 	// ASR config (Automatic Speech Recognition)
-	ASRConfig ASRConfig `yaml:"asr_config"              json:"asr_config"              gorm:"type:json" extensions:"x-agent,x-agent-detail"`
+	ASRConfig   ASRConfig          `yaml:"asr_config"              json:"asr_config"              gorm:"type:json" extensions:"x-agent,x-agent-detail"`
+	VideoConfig VideoProcessConfig `yaml:"video_config" json:"video_config" gorm:"type:json"`
 	// Storage provider config (new): only stores provider selection; credentials from workspace StorageEngineConfig
 	StorageProviderConfig *StorageProviderConfig `yaml:"storage_provider_config" json:"storage_provider_config"  gorm:"column:storage_provider_config;type:jsonb"`
 	// StorageBackendID binds this KB to one concrete storage instance. The
@@ -189,7 +190,8 @@ type KnowledgeBaseConfig struct {
 	// StorageBackendID rebinds file storage. nil means no change.
 	StorageBackendID *string `json:"storage_backend_id,omitempty"`
 	// ASRConfig replaces speech-recognition settings when set. nil means no change.
-	ASRConfig *ASRConfig `json:"asr_config,omitempty"`
+	ASRConfig   *ASRConfig          `json:"asr_config,omitempty"`
+	VideoConfig *VideoProcessConfig `json:"video_config,omitempty"`
 	// ExtractConfig replaces graph extraction settings when set. nil means no change.
 	ExtractConfig *ExtractConfig `json:"extract_config,omitempty"`
 	// QuestionGenerationConfig replaces generated-question settings when set. nil means no change.

@@ -4,6 +4,8 @@ import { useI18n } from 'vue-i18n';
 import { formatFileSize } from '@/utils/files';
 import KnowledgeTagPopover from './KnowledgeTagPopover.vue';
 import DocumentFileIcon from './DocumentFileIcon.vue';
+import VideoThumbnail from './VideoThumbnail.vue';
+import { formatVideoDuration, type VideoListInfo } from '@/api/knowledge-base/video';
 import DocumentActionMenu from './DocumentActionMenu.vue';
 import FolderPickerMenu, { type FolderOption } from './FolderPickerMenu.vue';
 import { shownStall } from '@/utils/knowledgeProcessingStall';
@@ -22,6 +24,7 @@ interface KnowledgeItem {
   folder_path?: string;
   file_type?: string;
   file_size?: number | string;
+  video?: VideoListInfo;
   type?: string;
   tags?: Tag[];
   parse_status?: string;
@@ -133,6 +136,15 @@ interface StatusInfo {
   hint?: string;
 }
 const computeStatus = (item: KnowledgeItem): StatusInfo => {
+  if (item.video?.status === 'queued') {
+    return { label: t('knowledgeBase.statusQueued'), theme: 'default', icon: 'time' };
+  }
+  if (item.video?.status === 'processing') {
+    return { label: t('knowledgeBase.statusProcessing'), theme: 'primary', icon: 'loading', spin: true };
+  }
+  if (item.video?.status === 'failed') {
+    return { label: t('knowledgeBase.statusFailed'), theme: 'danger', icon: 'close-circle' };
+  }
   const stall = shownStall(item.stall_state, item.stalled_minutes);
   if (stall === 'queued') {
     return {
@@ -327,7 +339,12 @@ const handleAction = (action: 'download' | 'edit' | 'reparse' | 'cancel-parse' |
         </div>
 
         <div class="cell cell-name" role="cell">
-          <DocumentFileIcon :source-type="item.type"
+          <span v-if="item.video?.thumbnail_id" class="row-video-thumbnail">
+            <DocumentFileIcon :source-type="item.type"
+              :file-name="item.file_type ? `document.${item.file_type.toLowerCase()}` : (item.original_file_name || item.file_name)" />
+            <VideoThumbnail :knowledge-id="item.id" :frame-id="item.video.thumbnail_id" />
+          </span>
+          <DocumentFileIcon v-else :source-type="item.type"
             :file-name="item.file_type ? `document.${item.file_type.toLowerCase()}` : (item.original_file_name || item.file_name)" />
           <div class="row-file-text">
             <div class="row-title-line">
@@ -339,6 +356,10 @@ const handleAction = (action: 'download' | 'edit' | 'reparse' | 'cancel-parse' |
               <template v-if="formatFileSize(item.file_size)">
                 <span class="meta-sep" aria-hidden="true">·</span>
                 <span>{{ formatFileSize(item.file_size) }}</span>
+              </template>
+              <template v-if="item.video?.duration_ms">
+                <span class="meta-sep" aria-hidden="true">·</span>
+                <span>{{ formatVideoDuration(item.video.duration_ms) }}</span>
               </template>
               <span class="meta-sep" aria-hidden="true">·</span>
               <span :title="t('knowledgeBase.columnUpdatedAt')">{{ formatTime(item.updated_at) }}</span>
@@ -694,6 +715,9 @@ const handleAction = (action: 'download' | 'edit' | 'reparse' | 'cancel-parse' |
   gap: 12px;
   font-family: var(--app-font-family);
 }
+
+.row-video-thumbnail { position: relative; display: inline-flex; flex: 0 0 38px; width: 38px; height: 38px; align-items: center; justify-content: center; }
+.row-video-thumbnail :deep(.video-thumbnail) { position: absolute; inset: 0; }
 
 .cell-actions {
   justify-content: flex-end;

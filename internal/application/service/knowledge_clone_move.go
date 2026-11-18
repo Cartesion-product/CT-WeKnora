@@ -22,6 +22,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 // copyOwnedObject copies srcPath for the destination tenant and claims the
@@ -329,6 +330,19 @@ func (s *knowledgeService) CloneChunk(ctx context.Context, src, dst *types.Knowl
 				err = errors.Join(err, fmt.Errorf("clean failed clone chunks: %w", cleanupErr))
 				return
 			}
+			if IsVideoType(src.FileType) && s.db != nil {
+				if cleanupErr := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+					for _, table := range []any{&types.VideoKeyframe{}, &types.VideoEvidence{}, &types.VideoSegment{}, &types.VideoRun{}, &types.VideoAsset{}} {
+						if deleteErr := tx.Where("tenant_id = ? AND knowledge_id = ?", dst.TenantID, dst.ID).Delete(table).Error; deleteErr != nil {
+							return deleteErr
+						}
+					}
+					return nil
+				}); cleanupErr != nil {
+					err = errors.Join(err, fmt.Errorf("clean failed clone video metadata: %w", cleanupErr))
+					return
+				}
+			}
 		}
 		// The source file is already owned by this destination before chunk
 		// cloning. An identical embedded image must not release that claim.
@@ -427,6 +441,14 @@ func (s *knowledgeService) CloneChunk(ctx context.Context, src, dst *types.Knowl
 		}
 	}
 	s.bindChunkResources(ctx, dst.TenantID, dst.ID, targetChunks)
+	if IsVideoType(src.FileType) {
+		var videoCopies []string
+		videoCopies, err = s.cloneVideoData(ctx, src, dst, sourceKB, targetKB, srcTodst)
+		copiedURLs = append(copiedURLs, videoCopies...)
+		if err != nil {
+			return err
+		}
+	}
 
 	tenantID := types.MustTenantIDFromContext(ctx)
 	// Route CopyIndices via the source KB's bound store. This function does

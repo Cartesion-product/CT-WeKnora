@@ -22,6 +22,7 @@ import (
 	secutils "github.com/Tencent/WeKnora/internal/utils"
 	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
+	"gorm.io/gorm"
 )
 
 // ErrInvalidTenantID represents an error for invalid tenant ID
@@ -46,6 +47,7 @@ const kbDeleteTaskMaxRetry = 3
 
 // knowledgeBaseService implements the knowledge base service interface
 type knowledgeBaseService struct {
+	db              *gorm.DB
 	repo            interfaces.KnowledgeBaseRepository
 	kgRepo          interfaces.KnowledgeRepository
 	chunkRepo       interfaces.ChunkRepository
@@ -91,8 +93,10 @@ func NewKnowledgeBaseService(repo interfaces.KnowledgeBaseRepository,
 	audit interfaces.AuditLogService,
 	resourceCatalog interfaces.ResourceCatalog,
 	wikiRepo interfaces.WikiPageRepository,
+	db *gorm.DB,
 ) interfaces.KnowledgeBaseService {
 	return &knowledgeBaseService{
+		db:              db,
 		repo:            repo,
 		kgRepo:          kgRepo,
 		chunkRepo:       chunkRepo,
@@ -155,6 +159,10 @@ func (s *knowledgeBaseService) CreateKnowledgeBase(ctx context.Context,
 		kb.CreatorID = uid
 	}
 	kb.EnsureDefaults()
+	if err := kb.VideoConfig.Effective().Validate(); err != nil {
+		return nil, apperrors.NewBadRequestError(err.Error())
+	}
+	kb.VideoConfig = kb.VideoConfig.Effective()
 	applyTenantDefaultStorageProvider(ctx, kb)
 	if err := s.applyAndValidateStorageBackend(ctx, kb); err != nil {
 		return nil, err
@@ -714,6 +722,13 @@ func (s *knowledgeBaseService) UpdateKnowledgeBase(ctx context.Context,
 			}
 			kb.ASRConfig = *config.ASRConfig
 			changedFields = append(changedFields, "asr_config")
+		}
+		if config.VideoConfig != nil {
+			if err := config.VideoConfig.Validate(); err != nil {
+				return nil, apperrors.NewBadRequestError(err.Error())
+			}
+			kb.VideoConfig = *config.VideoConfig
+			changedFields = append(changedFields, "video_config")
 		}
 		if config.QuestionGenerationConfig != nil {
 			next := *config.QuestionGenerationConfig
@@ -1505,6 +1520,7 @@ func (s *knowledgeBaseService) CopyKnowledgeBase(ctx context.Context,
 			EmbeddingModelID:      sourceKB.EmbeddingModelID,
 			SummaryModelID:        sourceKB.SummaryModelID,
 			VLMConfig:             sourceKB.VLMConfig,
+			VideoConfig:           sourceKB.VideoConfig,
 			StorageProviderConfig: sourceKB.StorageProviderConfig,
 			StorageBackendID:      sourceKB.StorageBackendID,
 			StorageConfig:         sourceKB.StorageConfig,

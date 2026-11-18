@@ -16,6 +16,25 @@ import (
 	"gorm.io/gorm"
 )
 
+func TestMarkGraphVideoSources(t *testing.T) {
+	graph := &types.WikiGraphData{Nodes: []types.WikiGraphNode{
+		{Slug: "summary/video", PageType: types.WikiPageTypeSummary},
+		{Slug: "entity/product", PageType: types.WikiPageTypeEntity},
+		{Slug: "summary/other", PageType: types.WikiPageTypeSummary},
+	}}
+	pages := []*types.WikiPage{
+		{Slug: "summary/video", SourceRefs: types.StringArray{"video-id|Demo.mp4", "video-id", "inactive-id"}},
+		{Slug: "entity/product", SourceRefs: types.StringArray{"video-id"}},
+		{Slug: "summary/other", SourceRefs: types.StringArray{"inactive-id"}},
+	}
+
+	markGraphVideoSources(graph, pages, []string{"video-id"})
+
+	require.Equal(t, []string{"video-id"}, graph.Nodes[0].VideoSourceIDs)
+	require.Equal(t, []string{"video-id"}, graph.Nodes[1].VideoSourceIDs)
+	require.Empty(t, graph.Nodes[2].VideoSourceIDs)
+}
+
 func TestPruneEmptyFolderChainsDeletesOnlyEmptyCandidateAncestors(t *testing.T) {
 	db, err := gorm.Open(sqlite.Open(fmt.Sprintf("file:%s?mode=memory&cache=shared", t.Name())), &gorm.Config{})
 	require.NoError(t, err)

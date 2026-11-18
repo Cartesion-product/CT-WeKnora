@@ -48,6 +48,7 @@ var (
 // knowledgeService implements the knowledge service interface
 // service 实现知识服务接口
 type knowledgeService struct {
+	db              *gorm.DB
 	config          *config.Config
 	retrieveEngine  interfaces.RetrieveEngineRegistry
 	ownership       retriever.TenantStoreOwnership
@@ -121,8 +122,10 @@ func NewKnowledgeService(
 	taskPendingRepo interfaces.TaskPendingOpsRepository,
 	spanTracker SpanTracker,
 	audit interfaces.AuditLogService,
+	db *gorm.DB,
 ) (interfaces.KnowledgeService, error) {
 	return &knowledgeService{
+		db:              db,
 		config:          config,
 		repo:            repo,
 		kbService:       kbService,
@@ -687,9 +690,64 @@ func (s *knowledgeService) ListPagedKnowledgeByKnowledgeBaseID(ctx context.Conte
 				}
 			}
 		}
+		if err := s.fillVideoListInfo(ctx, types.MustTenantIDFromContext(ctx), knowledges); err != nil {
+			return nil, err
+		}
 	}
 
 	return types.NewPageResult(total, page, knowledges), nil
+}
+
+func (s *knowledgeService) fillVideoListInfo(ctx context.Context, tenantID uint64, knowledges []*types.Knowledge) error {
+	videoIDs := make([]string, 0)
+	byID := make(map[string]*types.Knowledge, len(knowledges))
+	for _, knowledge := range knowledges {
+		if knowledge != nil && IsVideoType(knowledge.FileType) {
+			videoIDs = append(videoIDs, knowledge.ID)
+			byID[knowledge.ID] = knowledge
+		}
+	}
+	if len(videoIDs) == 0 || s.db == nil {
+		return nil
+	}
+	var assets []types.VideoAsset
+	if err := s.db.WithContext(ctx).Where("tenant_id = ? AND knowledge_id IN ?", tenantID, videoIDs).
+		Find(&assets).Error; err != nil {
+		return err
+	}
+	runIDs := make([]string, 0, len(assets))
+	for _, asset := range assets {
+		byID[asset.KnowledgeID].Video = &types.VideoListInfo{DurationMS: asset.DurationMS, Status: asset.Status}
+		if asset.CurrentRunID != "" {
+			runIDs = append(runIDs, asset.CurrentRunID)
+		}
+	}
+	if len(runIDs) > 0 {
+		var runs []types.VideoRun
+		if err := s.db.WithContext(ctx).Where("tenant_id = ? AND id IN ?", tenantID, runIDs).
+			Find(&runs).Error; err != nil {
+			return err
+		}
+		for _, run := range runs {
+			if row := byID[run.KnowledgeID]; row != nil && row.Video != nil {
+				row.Video.Stage = run.Stage
+			}
+		}
+	}
+	var frames []types.VideoKeyframe
+	if err := s.db.WithContext(ctx).Table("video_keyframes AS frame").Select("frame.*").
+		Joins("JOIN video_assets AS asset ON asset.knowledge_id = frame.knowledge_id AND asset.tenant_id = frame.tenant_id AND asset.active_run_id = frame.run_id").
+		Where("frame.tenant_id = ? AND frame.knowledge_id IN ?", tenantID, videoIDs).
+		Where("frame.id = (SELECT candidate.id FROM video_keyframes AS candidate WHERE candidate.tenant_id = frame.tenant_id AND candidate.knowledge_id = frame.knowledge_id AND candidate.run_id = frame.run_id ORDER BY candidate.frame_ms, candidate.id LIMIT 1)").
+		Find(&frames).Error; err != nil {
+		return err
+	}
+	for _, frame := range frames {
+		if row := byID[frame.KnowledgeID]; row != nil && row.Video != nil {
+			row.Video.ThumbnailID = frame.ID
+		}
+	}
+	return nil
 }
 
 // ListKnowledgeFolderTree returns the folder hierarchy of a knowledge base with
@@ -910,7 +968,14 @@ func (s *knowledgeService) GetKnowledgeBatch(ctx context.Context,
 	if len(ids) == 0 {
 		return nil, nil
 	}
-	return s.repo.GetKnowledgeBatch(ctx, tenantID, ids)
+	knowledges, err := s.repo.GetKnowledgeBatch(ctx, tenantID, ids)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.fillVideoListInfo(ctx, tenantID, knowledges); err != nil {
+		return nil, err
+	}
+	return knowledges, nil
 }
 
 // GetKnowledgeBatchWithSharedAccess retrieves knowledge by IDs, including items from shared KBs the user has access to.

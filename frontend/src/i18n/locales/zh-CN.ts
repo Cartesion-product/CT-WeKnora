@@ -1,4 +1,19 @@
 export default {
+  videoKnowledge: {
+    tabTip: '浏览知识库中的视频', refresh: '刷新视频', empty: '暂无视频', previousPage: '上一页', nextPage: '下一页',
+    parseTitle: '视频解析', parseDescription: '视频按时间抽帧，提取画面文字，并可启用画面描述和语音转写。',
+    framePipeline: '抽帧与画面文字', framePipelineDescription: '使用知识库视频解析设置中的 FFmpeg 抽帧与 Tesseract OCR 参数。',
+    frameInterval: '抽帧间隔（秒）', maxFrames: '最大抽帧数', ocrLanguage: '画面文字语言',
+    invalidConfig: '请检查视频解析设置：抽帧间隔为 1–60 秒，最大帧数为 1–300。',
+    ocrChineseEnglish: '中文 + 英文', ocrChinese: '中文', ocrEnglish: '英文',
+    visualDescription: '生成画面描述', transcription: '语音转写', relatedVideos: '相关视频',
+    tab: '视频', retry: '重试', loadFailed: '无法加载视频详情', ingestDisabled: '视频上传未启用，已跳过 {count} 个 MP4 文件',
+    playbackFailed: '视频暂时无法播放', loadingPlayback: '正在加载视频',
+    duration: '时长', segments: '片段', noSegments: '暂无片段', loadMore: '加载更多片段',
+    seek: '跳转到此时间', frame: '关键帧',
+    sourceUpdated: '该引用来自旧版本视频，已停止自动跳转；请核对当前片段。',
+    modality: { asr: '语音', ocr: '画面文字', vlm: '画面描述' },
+  },
   documentProgress: {
     "queueView": "队列任务",
     "title": "资料与 Wiki 进度",
@@ -8715,7 +8730,7 @@ export default {
     tagLabel: '标签',
     tagPlaceholder: '请选择标签',
     noTags: '暂无标签',
-    videosFilteredNoVLM: '已跳过 {count} 个视频文件（暂不支持视频上传）',
+    videosFilteredNoVLM: '已跳过 {count} 个视频文件（当前仅支持 MP4）',
     unsupportedTypesHint: '部分文档类型（{types}）暂无可用解析引擎，上传后将无法解析',
     goToParserSettings: '前往配置',
     importURL: '导入网页',
@@ -9312,6 +9327,7 @@ export default {
       spreadsheet: '表格',
       presentation: '演示文稿',
       image: '图片',
+      video: '视频',
       web: '网页',
       data: '数据'
     },

@@ -210,6 +210,17 @@ func NewRouter(params RouterParams) *gin.Engine {
 	r.POST("/api/v1/local-browser/internal", params.SessionHandler.BrowserSkillInternal)
 
 	// 认证中间件
+	// Native video elements cannot attach Authorization headers. The opaque
+	// playback token restores the bearer for a fresh Auth + KB check per request.
+	r.GET("/api/v1/knowledge/:id/video/stream", params.KnowledgeHandler.InjectVideoPlaybackAuth,
+		middleware.Auth(params.TenantService, params.UserService, params.TenantMemberService, params.TenantAPIKeyService, params.Config),
+		params.KnowledgeHandler.StreamVideo)
+	r.HEAD("/api/v1/knowledge/:id/video/stream", params.KnowledgeHandler.InjectVideoPlaybackAuth,
+		middleware.Auth(params.TenantService, params.UserService, params.TenantMemberService, params.TenantAPIKeyService, params.Config),
+		params.KnowledgeHandler.StreamVideo)
+	r.GET("/api/v1/knowledge/:id/video/keyframes/:frame_id", params.KnowledgeHandler.InjectVideoPlaybackAuth,
+		middleware.Auth(params.TenantService, params.UserService, params.TenantMemberService, params.TenantAPIKeyService, params.Config),
+		params.KnowledgeHandler.StreamVideoKeyframe)
 	r.Use(middleware.Auth(params.TenantService, params.UserService, params.TenantMemberService, params.TenantAPIKeyService, params.Config))
 
 	// 文件服务：统一代理本地/MinIO/COS/TOS存储后端（需要认证）

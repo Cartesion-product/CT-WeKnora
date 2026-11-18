@@ -83,6 +83,7 @@ func (s *knowledgeBaseService) processSearchResults(ctx context.Context,
 
 	// Build final search results
 	searchResults := s.assembleSearchResults(ctx, chunks, chunkMap, knowledgeMap, index, skipEnrichment)
+	s.attachVideoMedia(ctx, searchResults)
 
 	// Results can come from org-shared KBs owned by another workspace; the
 	// chunks above were already permission checked, so look up their image
@@ -91,6 +92,59 @@ func (s *knowledgeBaseService) processSearchResults(ctx context.Context,
 
 	logger.Infof(ctx, "Search results processed, total: %d", len(searchResults))
 	return searchResults, nil
+}
+
+// attachVideoMedia only accepts segments from the currently published run.
+// This also keeps an old vector hit from acquiring coordinates from a newer
+// processing run after a video is rebuilt.
+func (s *knowledgeBaseService) attachVideoMedia(ctx context.Context, results []*types.SearchResult) {
+	if s.db == nil || len(results) == 0 {
+		return
+	}
+	ids := make([]string, 0, len(results))
+	for _, result := range results {
+		if result != nil && result.ID != "" {
+			ids = append(ids, result.ID)
+		}
+	}
+	if len(ids) == 0 {
+		return
+	}
+	type mediaRow struct {
+		ChunkID    string
+		SegmentID  string
+		RunID      string
+		EvidenceID string
+		Modality   string
+		StartMS    *int64
+		EndMS      *int64
+		FrameMS    *int64
+	}
+	var rows []mediaRow
+	err := s.db.WithContext(ctx).Table("video_segments AS segment").
+		Select("segment.chunk_id, segment.id AS segment_id, segment.run_id, evidence.id AS evidence_id, evidence.modality, evidence.start_ms, evidence.end_ms, evidence.frame_ms").
+		Joins("JOIN video_assets AS asset ON asset.knowledge_id = segment.knowledge_id AND asset.tenant_id = segment.tenant_id AND asset.active_run_id = segment.run_id").
+		Joins("JOIN video_evidences AS evidence ON evidence.segment_id = segment.id AND evidence.run_id = segment.run_id").
+		Where("segment.chunk_id IN ?", ids).
+		Order("segment.chunk_id, evidence.modality, evidence.id").Find(&rows).Error
+	if err != nil {
+		logger.Warnf(ctx, "video media lookup failed: %v", err)
+		return
+	}
+	byChunk := make(map[string]*types.MediaReference, len(rows))
+	for _, row := range rows {
+		if _, exists := byChunk[row.ChunkID]; exists {
+			continue
+		}
+		byChunk[row.ChunkID] = &types.MediaReference{Type: "video", SegmentID: row.SegmentID,
+			EvidenceID: row.EvidenceID, Modality: row.Modality, ProcessingRunID: row.RunID,
+			StartMS: row.StartMS, EndMS: row.EndMS, FrameMS: row.FrameMS}
+	}
+	for _, result := range results {
+		if result != nil {
+			result.Media = byChunk[result.ID]
+		}
+	}
 }
 
 // chunkIndex holds pre-computed lookup structures for processing search results.

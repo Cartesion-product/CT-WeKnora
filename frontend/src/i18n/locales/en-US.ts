@@ -1,4 +1,19 @@
 export default {
+  videoKnowledge: {
+    tabTip: 'Browse videos in this knowledge base', refresh: 'Refresh videos', empty: 'No videos yet', previousPage: 'Previous page', nextPage: 'Next page',
+    parseTitle: 'Video processing', parseDescription: 'Extract frames and on-screen text, with optional visual descriptions and speech transcription.',
+    framePipeline: 'Frames and on-screen text', framePipelineDescription: 'Uses the FFmpeg and Tesseract OCR settings configured for this knowledge base.',
+    frameInterval: 'Frame interval (seconds)', maxFrames: 'Maximum frames', ocrLanguage: 'On-screen text language',
+    invalidConfig: 'Check video processing settings: frame interval must be 1–60 seconds and maximum frames 1–300.',
+    ocrChineseEnglish: 'Chinese + English', ocrChinese: 'Chinese', ocrEnglish: 'English',
+    visualDescription: 'Describe visuals', transcription: 'Transcribe speech', relatedVideos: 'Related videos',
+    tab: 'Video', retry: 'Retry', loadFailed: 'Could not load video details', ingestDisabled: 'Video upload is disabled; skipped {count} MP4 file(s)',
+    playbackFailed: 'Video playback is unavailable', loadingPlayback: 'Loading video',
+    duration: 'Duration', segments: 'Segments', noSegments: 'No segments yet', loadMore: 'Load more segments',
+    seek: 'Jump to this time', frame: 'Frame',
+    sourceUpdated: 'This citation refers to an earlier video version. Automatic seeking is disabled; verify the current segment.',
+    modality: { asr: 'Speech', ocr: 'On-screen text', vlm: 'Visual description' },
+  },
   documentProgress: {
     "queueView": "Queue tasks",
     "title": "Document and Wiki progress",
@@ -540,6 +555,7 @@ export default {
       spreadsheet: 'Spreadsheets',
       presentation: 'Presentations',
       image: 'Images',
+      video: 'Videos',
       web: 'Web pages',
       data: 'Data'
     },
@@ -1072,7 +1088,7 @@ export default {
     tagLabel: 'Tag',
     tagPlaceholder: 'Select tags',
     noTags: 'No tags',
-    videosFilteredNoVLM: 'Skipped {count} video file(s) (video upload is not supported)',
+    videosFilteredNoVLM: 'Skipped {count} video file(s) (only MP4 is supported)',
     unsupportedTypesHint: 'Some document types ({types}) have no available parser engine and cannot be processed',
     goToParserSettings: 'Configure',
     importURL: 'Import from URL',

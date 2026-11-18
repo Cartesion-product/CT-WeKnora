@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/Tencent/WeKnora/internal/models/utils/ollama"
@@ -60,11 +61,75 @@ func (a *ollamaASR) Transcribe(ctx context.Context, audio []byte, _ string) (*Tr
 		return nil, fmt.Errorf("audio contains no samples")
 	}
 
-	parts := make([]string, 0, (len(pcm)+ollamaASRChunkBytes-1)/ollamaASRChunkBytes)
-	for start := 0; start < len(pcm); start += ollamaASRChunkBytes {
-		chunk := start/ollamaASRChunkBytes + 1
-		end := min(start+ollamaASRChunkBytes, len(pcm))
-		wav := ollamaASRWAV(pcm[start:end])
+	return a.transcribePCM(ctx, bytes.NewReader(pcm), 0, nil)
+}
+
+// TranscribeFile reads ffmpeg's PCM output one 30-second window at a time.
+func (a *ollamaASR) TranscribeFile(ctx context.Context, path string) (*TranscriptionResult, error) {
+	return a.transcribeFile(ctx, path, 0, nil)
+}
+
+func (a *ollamaASR) TranscribeFileWindows(ctx context.Context, path string, startWindow int, visit func(Window) error) error {
+	if visit == nil {
+		return fmt.Errorf("window callback is required")
+	}
+	_, err := a.transcribeFile(ctx, path, startWindow, visit)
+	return err
+}
+
+func (a *ollamaASR) transcribeFile(ctx context.Context, path string, startWindow int, visit func(Window) error) (*TranscriptionResult, error) {
+	if strings.TrimSpace(path) == "" {
+		return nil, fmt.Errorf("audio path is empty")
+	}
+	if startWindow < 0 {
+		return nil, fmt.Errorf("start window must be non-negative")
+	}
+	args := []string{"-hide_banner", "-loglevel", "error"}
+	if startWindow > 0 {
+		args = append(args, "-ss", strconv.Itoa(startWindow*30))
+	}
+	args = append(args, "-i", path, "-vn", "-ac", "1", "-ar", "16000", "-f", "s16le", "pipe:1")
+	cmd := exec.CommandContext(ctx, "ffmpeg", args...)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, err
+	}
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	if err := cmd.Start(); err != nil {
+		return nil, fmt.Errorf("start ffmpeg: %w", err)
+	}
+	result, transcribeErr := a.transcribePCM(ctx, stdout, startWindow, visit)
+	if transcribeErr != nil {
+		_ = cmd.Process.Kill()
+	}
+	waitErr := cmd.Wait()
+	if transcribeErr != nil {
+		return nil, transcribeErr
+	}
+	if waitErr != nil {
+		return nil, fmt.Errorf("decode audio: %w: %s", waitErr, strings.TrimSpace(stderr.String()))
+	}
+	return result, nil
+}
+
+func (a *ollamaASR) transcribePCM(ctx context.Context, pcm io.Reader, startWindow int, visit func(Window) error) (*TranscriptionResult, error) {
+	parts := make([]string, 0)
+	segments := make([]Segment, 0)
+	buf := make([]byte, ollamaASRChunkBytes)
+	var totalBytes int64
+	for chunk := startWindow; ; chunk++ {
+		n, readErr := io.ReadFull(pcm, buf)
+		if readErr != nil && readErr != io.EOF && readErr != io.ErrUnexpectedEOF {
+			return nil, fmt.Errorf("read decoded audio: %w", readErr)
+		}
+		if n == 0 {
+			break
+		}
+		if n%2 != 0 {
+			return nil, fmt.Errorf("decoded PCM ended on an incomplete sample")
+		}
+		wav := ollamaASRWAV(buf[:n])
 		stream := false
 		req := &ollamaapi.ChatRequest{
 			Model:  a.modelName,
@@ -78,19 +143,44 @@ func (a *ollamaASR) Transcribe(ctx context.Context, audio []byte, _ string) (*Tr
 			answer.WriteString(resp.Message.Content)
 			return nil
 		}); err != nil {
-			return nil, fmt.Errorf("Ollama ASR chunk %d: %w", chunk, err)
+			return nil, fmt.Errorf("Ollama ASR chunk %d: %w", chunk+1, err)
 		}
 		_, transcript, ok := strings.Cut(answer.String(), "<asr_text>")
 		if !ok {
-			return nil, fmt.Errorf("Ollama ASR chunk %d returned no <asr_text> marker", chunk)
+			return nil, fmt.Errorf("Ollama ASR chunk %d returned no <asr_text> marker", chunk+1)
 		}
-		if text := strings.TrimSpace(transcript); text != "" {
+		text := strings.TrimSpace(transcript)
+		window := Window{
+			Index: chunk,
+			Start: float64(startWindow*30) + float64(totalBytes)/(ollamaASRSampleRate*2),
+			End:   float64(startWindow*30) + float64(totalBytes+int64(n))/(ollamaASRSampleRate*2),
+			Text:  text,
+		}
+		if visit != nil {
+			if err := visit(window); err != nil {
+				return nil, fmt.Errorf("save Ollama ASR window %d: %w", chunk+1, err)
+			}
+		}
+		if text != "" {
 			parts = append(parts, text)
+			segments = append(segments, Segment{
+				Start: window.Start,
+				End:   window.End,
+				Text:  text,
+			})
 		}
+		totalBytes += int64(n)
+		if readErr == io.ErrUnexpectedEOF {
+			break
+		}
+	}
+	if totalBytes == 0 {
+		return nil, fmt.Errorf("audio contains no samples")
 	}
 	return &TranscriptionResult{
 		Text:     strings.Join(parts, " "),
-		Duration: float64(len(pcm)) / (ollamaASRSampleRate * 2),
+		Segments: segments,
+		Duration: float64(startWindow*30) + float64(totalBytes)/(ollamaASRSampleRate*2),
 	}, nil
 }
 

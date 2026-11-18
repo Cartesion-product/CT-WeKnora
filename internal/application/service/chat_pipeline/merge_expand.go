@@ -38,6 +38,9 @@ func (p *PluginMerge) expandShortContextWithNeighbors(
 		if r == nil || r.ID == "" || r.Content == "" {
 			continue
 		}
+		if r.Media != nil {
+			continue
+		}
 		if r.ChunkType != string(types.ChunkTypeText) {
 			continue
 		}

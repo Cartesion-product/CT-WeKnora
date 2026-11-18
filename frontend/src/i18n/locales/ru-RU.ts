@@ -1,4 +1,19 @@
 export default {
+  videoKnowledge: {
+    tabTip: 'Видео в базе знаний', refresh: 'Обновить видео', empty: 'Видео пока нет', previousPage: 'Предыдущая страница', nextPage: 'Следующая страница',
+    parseTitle: 'Обработка видео', parseDescription: 'Извлечение кадров и текста с возможностью описания изображения и расшифровки речи.',
+    framePipeline: 'Кадры и текст на экране', framePipelineDescription: 'Используются настройки FFmpeg и Tesseract OCR этой базы знаний.',
+    frameInterval: 'Интервал кадров (с)', maxFrames: 'Максимум кадров', ocrLanguage: 'Язык текста на экране',
+    invalidConfig: 'Проверьте настройки видео: интервал кадров 1–60 секунд, максимум кадров 1–300.',
+    ocrChineseEnglish: 'Китайский + английский', ocrChinese: 'Китайский', ocrEnglish: 'Английский',
+    visualDescription: 'Описывать изображение', transcription: 'Расшифровывать речь', relatedVideos: 'Связанные видео',
+    tab: 'Видео', retry: 'Повторить', loadFailed: 'Не удалось загрузить сведения о видео', ingestDisabled: 'Загрузка видео отключена; пропущено файлов MP4: {count}',
+    playbackFailed: 'Видео недоступно для воспроизведения', loadingPlayback: 'Загрузка видео',
+    duration: 'Длительность', segments: 'Фрагменты', noSegments: 'Фрагментов пока нет', loadMore: 'Загрузить ещё фрагменты',
+    seek: 'Перейти к этому времени', frame: 'Кадр',
+    sourceUpdated: 'Эта ссылка относится к прежней версии видео. Автоматический переход отключен; проверьте текущий фрагмент.',
+    modality: { asr: 'Речь', ocr: 'Текст на экране', vlm: 'Описание изображения' },
+  },
   documentProgress: {
     "queueView": "Задачи очереди",
     "title": "Прогресс документов и Wiki",
@@ -8714,7 +8729,7 @@ export default {
     tagLabel: 'Тег',
     tagPlaceholder: 'Выберите теги',
     noTags: 'Нет тегов',
-    videosFilteredNoVLM: 'Пропущено {count} видеофайлов (загрузка видео не поддерживается)',
+    videosFilteredNoVLM: 'Пропущено {count} видеофайлов (сейчас поддерживается только MP4)',
     unsupportedTypesHint: 'Некоторые типы документов ({types}) не имеют доступного парсера и не могут быть обработаны',
     goToParserSettings: 'Настроить',
     importURL: 'Импорт из URL',
@@ -9311,6 +9326,7 @@ export default {
       spreadsheet: 'Таблицы',
       presentation: 'Презентации',
       image: 'Изображения',
+      video: 'Видео',
       web: 'Веб-страницы',
       data: 'Данные'
     },

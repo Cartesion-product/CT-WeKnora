@@ -215,7 +215,8 @@ type Knowledge struct {
 	// File type of the knowledge
 	FileType string `json:"file_type" extensions:"x-agent"`
 	// File size of the knowledge
-	FileSize int64 `json:"file_size" extensions:"x-agent"`
+	FileSize int64          `json:"file_size" extensions:"x-agent"`
+	Video    *VideoListInfo `json:"video,omitempty" gorm:"-"`
 	// File hash of the knowledge
 	FileHash string `json:"file_hash"`
 	// File path of the knowledge

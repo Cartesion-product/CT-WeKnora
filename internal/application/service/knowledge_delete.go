@@ -631,6 +631,11 @@ func (s *knowledgeService) executeKnowledgeDelete(plan *knowledgeDeletePlan, sin
 				logger.GetLogger(ctx).WithField("error", err).Errorf("DeleteKnowledge delete file failed")
 			}
 		}
+		if IsVideoType(knowledge.FileType) {
+			if err := s.cleanupVideoData(ctx, knowledge, kbFileServices[knowledge.KnowledgeBaseID]); err != nil {
+				logger.Warnf(ctx, "Failed to clean video data for knowledge %s: %v", knowledge.ID, err)
+			}
+		}
 		storageAdjust -= knowledge.StorageSize
 	}
 	// Delete extracted images per KB

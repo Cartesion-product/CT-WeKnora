@@ -2,6 +2,17 @@ import type { SourceLocator } from './sourceLocator'
 
 export type ReferenceItemKind = 'web' | 'document' | 'tool'
 
+export type MediaReference = {
+  type: 'video'
+  segment_id?: string
+  evidence_id?: string
+  modality?: string
+  processing_run_id?: string
+  start_ms?: number
+  end_ms?: number
+  frame_ms?: number
+}
+
 export type KnowledgeReferenceLike = {
   id?: string
   chunk_ids?: string[]
@@ -19,6 +30,7 @@ export type KnowledgeReferenceLike = {
   source_locators?: SourceLocator[]
   /** After merging a document's chunks: the first one with positions. */
   source_chunk_id?: string
+  media?: MediaReference
 }
 
 export type ReferenceListItem = {
@@ -38,6 +50,7 @@ export type ReferenceListItem = {
   knowledgeId?: string
   knowledgeBaseId?: string
   content?: string
+  media?: MediaReference
 }
 
 export type ReferenceDrawerSection = {
@@ -177,7 +190,7 @@ function buildDocumentItem(item: KnowledgeReferenceLike, index: number): Referen
     [item.knowledge_base_id, item.knowledge_title || item.knowledge_filename].filter(Boolean).join(':') ||
     chunkId || `doc-${index}`
   return {
-    key: `doc:${documentKey}`,
+    key: `doc:${documentKey}${item.media?.type === 'video' ? `:${item.media.segment_id || item.id || index}` : ''}`,
     kind: 'document',
     fileName: item.knowledge_filename,
     index,
@@ -189,6 +202,7 @@ function buildDocumentItem(item: KnowledgeReferenceLike, index: number): Referen
     knowledgeBaseId: item.knowledge_base_id,
     snippet: truncateText(item.content || '', 220) || undefined,
     content: item.content,
+    media: item.media,
   }
 }
 
@@ -207,6 +221,7 @@ function buildToolItem(item: KnowledgeReferenceLike, index: number): ReferenceLi
 }
 
 function getDocumentGroupKey(item: KnowledgeReferenceLike, index: number): string {
+  if (item.media?.type === 'video') return `${item.knowledge_id || 'video'}:${item.media.segment_id || item.id || index}`
   if (item.knowledge_id) return item.knowledge_id
   const title = item.knowledge_title || item.knowledge_filename
   if (title) return [item.knowledge_base_id, title].filter(Boolean).join(':')
@@ -355,6 +370,7 @@ export type ReferenceSourceTarget = {
   content?: string
   locators?: SourceLocator[]
   anchorText?: string
+  media?: MediaReference
 }
 
 /**
@@ -389,6 +405,7 @@ export function resolveReferenceSource(
     content: exact ? exact.content : undefined,
     locators: exact ? exact.source_locators : undefined,
     anchorText: target?.anchorText,
+    media: ref.media,
   }
 }
 

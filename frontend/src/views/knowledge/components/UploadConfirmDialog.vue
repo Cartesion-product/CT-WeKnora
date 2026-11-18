@@ -212,6 +212,29 @@
                     </div>
                   </div>
 
+                  <div v-if="hasVideo" v-show="activeSection === 'video'" class="section">
+                    <div class="kb-settings-block">
+                      <div class="section-header">
+                        <h2 class="section-title">{{ t('videoKnowledge.parseTitle') }}</h2>
+                        <p class="section-desc">{{ t('videoKnowledge.framePipelineDescription') }}</p>
+                      </div>
+                      <div class="settings-group">
+                        <div class="setting-row">
+                          <div class="setting-info"><label>{{ t('videoKnowledge.frameInterval') }}</label></div>
+                          <div class="setting-control"><span class="setting-readonly-value">{{ videoConfig.frameIntervalSeconds }}</span></div>
+                        </div>
+                        <div class="setting-row">
+                          <div class="setting-info"><label>{{ t('videoKnowledge.maxFrames') }}</label></div>
+                          <div class="setting-control"><span class="setting-readonly-value">{{ videoConfig.maxFrames }}</span></div>
+                        </div>
+                        <div class="setting-row">
+                          <div class="setting-info"><label>{{ t('videoKnowledge.ocrLanguage') }}</label></div>
+                          <div class="setting-control"><span class="setting-readonly-value">{{ videoOcrLanguageLabel }}</span></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div v-show="activeSection === 'chunking'" class="section">
                     <div class="section-content">
                       <div class="section-header">
@@ -699,6 +722,7 @@ import type {
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']
 const AUDIO_EXTENSIONS = ['mp3', 'wav', 'm4a', 'flac', 'ogg']
+const VIDEO_EXTENSIONS = ['mp4']
 
 // The image-attribute registry, fetched from the backend (single source of
 // truth). Falls back to the static registry until the endpoint answers.
@@ -714,7 +738,7 @@ async function loadImageAttrSchema(kbId: string) {
   }
 }
 
-type ConfigSectionKey = 'tags' | 'parser' | 'chunking' | 'multimodal' | 'asr' | 'summary' | 'question' | 'graph'
+type ConfigSectionKey = 'tags' | 'parser' | 'video' | 'chunking' | 'multimodal' | 'asr' | 'summary' | 'question' | 'graph'
 type IssueSectionKey = 'multimodal' | 'asr'
 
 interface ChunkingUIConfig {
@@ -979,6 +1003,18 @@ const batchFileExts = computed(() => {
 })
 
 const hasPdf = computed(() => batchFileExts.value.includes('pdf'))
+const hasVideo = computed(() => batchFileExts.value.some(ext => VIDEO_EXTENSIONS.includes(ext)))
+const videoConfig = computed(() => ({
+  frameIntervalSeconds: props.kbInfo?.video_config?.frame_interval_seconds ?? 15,
+  maxFrames: props.kbInfo?.video_config?.max_frames ?? 120,
+  ocrLanguage: props.kbInfo?.video_config?.ocr_language || 'chi_sim+eng',
+}))
+const videoOcrLanguageLabel = computed(() => {
+  const key = videoConfig.value.ocrLanguage === 'chi_sim+eng' ? 'ocrChineseEnglish'
+    : videoConfig.value.ocrLanguage === 'chi_sim' ? 'ocrChinese'
+    : videoConfig.value.ocrLanguage === 'eng' ? 'ocrEnglish' : ''
+  return key ? t(`videoKnowledge.${key}`) : videoConfig.value.ocrLanguage
+})
 
 const chunkingStrategyOptions = computed(() => [
   { label: t('knowledgeEditor.chunking.strategies.auto.label'), value: 'auto' },
@@ -1088,6 +1124,9 @@ const navItems = computed(() => {
     push('tags', 'tag', t('uploadConfirm.tabTags'))
   }
   push('parser', 'file-search', t('settings.parserEngine'))
+  if (hasVideo.value) {
+    push('video', 'play-circle', t('videoKnowledge.parseTitle'))
+  }
   push('chunking', 'file-copy', t('knowledgeEditor.sidebar.chunking'))
   push(
     'multimodal',
@@ -1129,6 +1168,10 @@ function getSectionNavStatus(
         return { status: t('uploadConfirm.navParserCustomized') }
       }
       return { status: t('uploadConfirm.navParserDefault'), statusTone: 'muted' }
+    case 'video':
+      return {
+        status: `${videoConfig.value.frameIntervalSeconds}s · ${videoConfig.value.maxFrames}`,
+      }
     case 'chunking': {
       const chunking = uiState.value.chunkingConfig
       const parts = [t('uploadConfirm.navChunkingSummary', { size: chunking.chunkSize })]
@@ -1212,6 +1255,7 @@ const canConfirm = computed(() => {
 
 function getDefaultSection(): ConfigSectionKey {
   if (props.mode === 'reparse') return 'parser'
+  if (hasVideo.value && batchFileExts.value.every(ext => VIDEO_EXTENSIONS.includes(ext))) return 'video'
   if (issueSectionKeys.value.has('multimodal')) return 'multimodal'
   if (issueSectionKeys.value.has('asr')) return 'asr'
   return 'tags'
@@ -1537,6 +1581,12 @@ watch(
 
 watch(isGraphSectionAvailable, (available) => {
   if (!available && activeSection.value === 'graph') {
+    activeSection.value = getDefaultSection()
+  }
+})
+
+watch(hasVideo, (available) => {
+  if (!available && activeSection.value === 'video') {
     activeSection.value = getDefaultSection()
   }
 })
@@ -2443,6 +2493,12 @@ const handleConfirm = () => {
     gap: 12px;
     justify-content: flex-end;
   }
+}
+
+.setting-readonly-value {
+  color: var(--td-text-color-primary);
+  font-size: var(--app-text-md);
+  text-align: right;
 }
 
 .setting-row-vertical {

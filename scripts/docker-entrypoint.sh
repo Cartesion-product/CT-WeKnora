@@ -69,6 +69,10 @@ main() {
         fi
     done
 
+    if [ -d /tmp/video ]; then
+        chown appuser:appuser /tmp/video
+    fi
+
     grant_docker_sock_to_appuser /var/run/docker.sock
     case "${DOCKER_HOST:-}" in
         unix://*)

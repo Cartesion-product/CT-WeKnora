@@ -1,4 +1,19 @@
 export default {
+  videoKnowledge: {
+    tabTip: '瀏覽知識庫中的影片', refresh: '重新整理影片', empty: '暫無影片', previousPage: '上一頁', nextPage: '下一頁',
+    parseTitle: '影片解析', parseDescription: '影片依時間擷取影格與畫面文字，並可啟用畫面描述和語音轉寫。',
+    framePipeline: '擷取影格與畫面文字', framePipelineDescription: '使用知識庫影片解析設定中的 FFmpeg 與 Tesseract OCR 參數。',
+    frameInterval: '擷取間隔（秒）', maxFrames: '最大影格數', ocrLanguage: '畫面文字語言',
+    invalidConfig: '請檢查影片解析設定：擷取間隔為 1–60 秒，最大影格數為 1–300。',
+    ocrChineseEnglish: '中文 + 英文', ocrChinese: '中文', ocrEnglish: '英文',
+    visualDescription: '產生畫面描述', transcription: '語音轉寫', relatedVideos: '相關影片',
+    tab: '影片', retry: '重試', loadFailed: '無法載入影片詳情', ingestDisabled: '影片上傳未啟用，已略過 {count} 個 MP4 檔案',
+    playbackFailed: '影片暫時無法播放', loadingPlayback: '正在載入影片',
+    duration: '時長', segments: '片段', noSegments: '暫無片段', loadMore: '載入更多片段',
+    seek: '跳至此時間', frame: '關鍵影格',
+    sourceUpdated: '此引用來自舊版影片，已停止自動跳轉；請核對目前片段。',
+    modality: { asr: '語音', ocr: '畫面文字', vlm: '畫面描述' },
+  },
   documentProgress: {
     "queueView": "佇列任務",
     "title": "資料與 Wiki 進度",
@@ -8715,7 +8730,7 @@ export default {
     tagLabel: '標籤',
     tagPlaceholder: '請選擇標籤',
     noTags: '暫無標籤',
-    videosFilteredNoVLM: '已跳過 {count} 個影片檔案（暫不支持影片上傳）',
+    videosFilteredNoVLM: '已跳過 {count} 個影片檔案（目前僅支援 MP4）',
     unsupportedTypesHint: '部分文件類型（{types}）暫無可用解析引擎，上傳後將無法解析',
     goToParserSettings: '前往設定',
     importURL: '匯入網頁',
@@ -9312,6 +9327,7 @@ export default {
       spreadsheet: '表格',
       presentation: '簡報',
       image: '圖片',
+      video: '影片',
       web: '網頁',
       data: '資料'
     },

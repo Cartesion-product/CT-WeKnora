@@ -351,6 +351,7 @@ export function createKnowledgeBase(data: {
     model_id?: string;
     language?: string;
   };
+  video_config?: { frame_interval_seconds: number; max_frames: number; ocr_language: string };
   extract_config?: any;
   faq_config?: { index_mode: string; question_index_mode?: string };
   wiki_config?: {
@@ -385,6 +386,7 @@ export function updateKnowledgeBase(id: string, data: {
   config?: {
     chunking_config?: any;
     image_processing_config?: ImageProcessingConfig;
+    video_config?: { frame_interval_seconds: number; max_frames: number; ocr_language: string };
     faq_config?: any;
     wiki_config?: {
       auto_generate?: boolean;

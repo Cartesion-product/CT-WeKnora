@@ -1,4 +1,5 @@
 /** Shared citation tag preprocessing for chat markdown (QA + agent). */
+import type { MediaReference } from './referenceSources'
 
 /** Self-closing or unclosed `<kb/>` / `<web/>` tags from model output. */
 export const KB_WEB_TAG_RE = /<(?:kb|web)\b[^>]*?\s*\/?>/g
@@ -39,6 +40,7 @@ export type CitationKnowledgeRef = {
   chunk_index?: number
   chunk_type?: string
   knowledge_base_id?: string
+  media?: MediaReference
 }
 
 function parseTagAttributes(attrString: string): Record<string, string> {
@@ -181,7 +183,15 @@ export function preprocessCitationTags(
       const safeDoc = escapeHtml(doc)
       const safeKbId = escapeHtml(kbId)
       const safeChunkId = escapeHtml(chunkId)
-      const displayDoc = escapeHtml(truncateMiddle(doc))
+      const media = refs?.find(ref => ref.id === chunkId)?.media
+      const formatTime = (ms: number) => {
+        const seconds = Math.floor(ms / 1000)
+        return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
+      }
+      const position = media?.start_ms ?? media?.frame_ms
+      const time = media?.type === 'video' && typeof position === 'number'
+        ? ` ${formatTime(position)}` : ''
+      const displayDoc = escapeHtml(`${truncateMiddle(doc)}${time}`)
       return `<span class="citation citation-kb" data-kb-id="${safeKbId}" data-chunk-id="${safeChunkId}" data-doc="${safeDoc}" role="button" tabindex="0"><span class="citation-icon citation-icon--book" aria-hidden="true"></span><span class="citation-text">${displayDoc}</span><span class="citation-tip"><span class="tip-loading">…</span></span></span>`
     })
     .replace(/\[\[([^\]]+)\]\]/g, (match, inner: string) => {

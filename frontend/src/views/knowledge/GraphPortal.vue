@@ -59,7 +59,8 @@
             </t-button>
           </div>
           <div class="graph-surface" :class="{ 'controls-open': showMobileControls }">
-            <WikiBrowser :key="selectedGraph.id" :knowledge-base-id="selectedGraph.id" view="graph" :can-edit="false" />
+            <WikiBrowser :key="selectedGraph.id" :knowledge-base-id="selectedGraph.id" view="graph" :can-edit="false"
+              @open-source-doc="openSourceDoc" />
           </div>
         </template>
         <div v-else class="portal-empty">
@@ -93,6 +94,17 @@ const requestedId = computed(() => typeof route.params.kbId === 'string' ? route
 const selectedId = computed(() => requestedId.value)
 const selectedGraph = computed(() => graphs.value.find(graph => graph.id === selectedId.value))
 const filteredGraphs = computed(() => graphs.value.filter(graph => graph.name.toLocaleLowerCase().includes(search.value.toLocaleLowerCase())))
+
+function openSourceDoc(knowledgeId: string, video?: { startMs: number; segmentId?: string }) {
+  if (!selectedId.value) return
+  const query: Record<string, string> = { knowledge_id: knowledgeId }
+  if (video) {
+    query.start_ms = String(video.startMs)
+    if (video.segmentId) query.segment_id = video.segmentId
+  }
+  const target = router.resolve({ path: `/platform/knowledge-bases/${selectedId.value}`, query })
+  window.open(target.href, '_blank', 'noopener,noreferrer')
+}
 
 async function refresh() {
   loading.value = true

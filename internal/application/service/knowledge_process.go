@@ -36,6 +36,7 @@ import (
 	secutils "github.com/Tencent/WeKnora/internal/utils"
 	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
+	"gorm.io/gorm"
 )
 
 func (s *knowledgeService) cloneKnowledge(
@@ -104,9 +105,16 @@ func (s *knowledgeService) cloneKnowledge(
 		}
 		srcSvc := s.resolveFileServiceForPath(ctx, srcKB, src.FilePath)
 		dstSvc := s.resolveFileService(ctx, targetKB)
-		newPath, copyErr := copyOwnedObject(
-			ctx, srcSvc, dstSvc, src.FilePath, targetKB.TenantID, dst.ID,
-			s.resourceCatalog, types.ResourceRelationSourceFile)
+		var newPath string
+		var copyErr error
+		if IsVideoType(src.FileType) {
+			// CopyFile keeps large videos in object storage instead of buffering them in Go.
+			newPath, copyErr = dstSvc.CopyFile(ctx, src.FilePath, targetKB.TenantID, dst.ID)
+		} else {
+			newPath, copyErr = copyOwnedObject(
+				ctx, srcSvc, dstSvc, src.FilePath, targetKB.TenantID, dst.ID,
+				s.resourceCatalog, types.ResourceRelationSourceFile)
+		}
 		if copyErr != nil {
 			return fmt.Errorf("clone knowledge file copy failed: %w", copyErr)
 		}
@@ -155,6 +163,27 @@ func (s *knowledgeService) cloneKnowledge(
 	if err = s.CloneChunk(ctx, src, dst); err != nil {
 		return err
 	}
+	charged := false
+	if IsVideoType(src.FileType) && src.StorageSize > 0 {
+		if s.db == nil {
+			return fmt.Errorf("video clone storage accounting unavailable")
+		}
+		quota := s.db.WithContext(ctx).Model(&types.Tenant{}).
+			Where("id = ? AND (storage_quota <= 0 OR storage_used <= storage_quota - ?)", dst.TenantID, src.StorageSize).
+			Update("storage_used", gorm.Expr("storage_used + ?", src.StorageSize))
+		if quota.Error != nil {
+			return quota.Error
+		}
+		if quota.RowsAffected != 1 {
+			return fmt.Errorf("workspace storage quota exceeded")
+		}
+		charged = true
+		defer func() {
+			if err != nil && charged {
+				_ = s.tenantRepo.AdjustStorageUsed(context.WithoutCancel(ctx), dst.TenantID, -src.StorageSize)
+			}
+		}()
+	}
 	before := *dst
 	state.Phase = "done"
 	if err = setTransferState(dst, state); err != nil {
@@ -163,7 +192,8 @@ func (s *knowledgeService) cloneKnowledge(
 	dst.ParseStatus = types.ParseStatusCompleted
 	dst.EnableStatus = "enabled"
 	dst.StorageSize = src.StorageSize
-	return s.repo.UpdateKnowledgeForTransfer(ctx, &before, dst)
+	err = s.repo.UpdateKnowledgeForTransfer(ctx, &before, dst)
+	return err
 }
 
 // processDocumentFromPassage handles asynchronous processing of text passages
@@ -2994,6 +3024,9 @@ func (s *knowledgeService) reparseKnowledge(
 		logger.Errorf(ctx, "Failed to load knowledge: %v", err)
 		return nil, err
 	}
+	if IsVideoType(existing.FileType) {
+		return s.reparseVideoKnowledge(ctx, existing, kb, processOverrides)
+	}
 
 	tenantID := existing.TenantID
 
@@ -3327,6 +3360,11 @@ func (s *knowledgeService) CancelKnowledgeParse(
 	if existing == nil {
 		return nil, werrors.NewNotFoundError("knowledge not found")
 	}
+	if cancelled, err := s.cancelVideoRebuild(ctx, existing); err != nil {
+		return nil, err
+	} else if cancelled {
+		return existing, nil
+	}
 
 	switch existing.ParseStatus {
 	case types.ParseStatusCancelled:
@@ -3390,6 +3428,15 @@ func (s *knowledgeService) CancelKnowledgeParse(
 	// Best-effort dequeue. Failures here don't block the cancel — the
 	// downstream tasks will still self-abort at their entry guards.
 	s.dequeueKnowledgeTasks(ctx, knowledgeID)
+	if IsVideoType(existing.FileType) && s.db != nil {
+		var asset types.VideoAsset
+		if err := s.db.WithContext(ctx).Where("tenant_id = ? AND knowledge_id = ?", tenantID, knowledgeID).First(&asset).Error; err == nil {
+			s.db.WithContext(ctx).Model(&types.VideoRun{}).Where("id = ?", asset.CurrentRunID).
+				Updates(map[string]any{"status": "cancelled", "stage": "cancelled"})
+			s.db.WithContext(ctx).Model(&types.VideoAsset{}).Where("knowledge_id = ? AND current_run_id = ?", knowledgeID, asset.CurrentRunID).
+				Update("status", "cancelled")
+		}
+	}
 	// Wiki ingest lives in its own per-KB pending queue (task_pending_ops)
 	// rather than asynq, so dequeueKnowledgeTasks above can't see it.
 	// Mirror the deletion path's scrub so a cancelled knowledge doesn't

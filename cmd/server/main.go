@@ -70,6 +70,21 @@ func main() {
 
 	// Build dependency injection container
 	c := container.BuildContainer(runtime.GetContainer())
+	if os.Getenv("WEKNORA_WORKER_MODE") == "media" {
+		err := c.Invoke(func(cleaner interfaces.ResourceCleaner) {
+			signals := make(chan os.Signal, 1)
+			signal.Notify(signals, shutdownSignals...)
+			<-signals
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			cleaner.Cleanup(ctx)
+		})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "media worker startup failed: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	// One-shot bootstrap hooks (e.g. promote env-named user to system
 	// admin). Best-effort: never aborts startup — see bootstrap.go.

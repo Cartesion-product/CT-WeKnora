@@ -71,6 +71,11 @@ func RegisterKnowledgeRoutes(r *gin.RouterGroup, handler *handler.KnowledgeHandl
 	kbRead := kb.With(apiKeyRetrieve(apiKeyFullAccess()))
 	{
 		kb.POST("/file", g.OwnedKBOrAdmin(), g.KBAccessWrite("id"), handler.CreateKnowledgeFromFile)
+		kb.POST("/video-uploads", g.OwnedKBOrAdmin(), g.KBAccessWrite("id"), handler.CreateVideoUpload)
+		kb.GET("/video-uploads/:upload_id", g.OwnedKBOrAdmin(), g.KBAccessWrite("id"), handler.GetVideoUpload)
+		kb.PUT("/video-uploads/:upload_id/parts/:part_number", g.OwnedKBOrAdmin(), g.KBAccessWrite("id"), handler.PutVideoUploadPart)
+		kb.POST("/video-uploads/:upload_id/complete", g.OwnedKBOrAdmin(), g.KBAccessWrite("id"), handler.CompleteVideoUpload)
+		kb.DELETE("/video-uploads/:upload_id", g.OwnedKBOrAdmin(), g.KBAccessWrite("id"), handler.DeleteVideoUpload)
 		kb.POST("/url", g.OwnedKBOrAdmin(), g.KBAccessWrite("id"), handler.CreateKnowledgeFromURL)
 		kb.POST("/manual", g.OwnedKBOrAdmin(), g.KBAccessWrite("id"), handler.CreateManualKnowledge)
 		kbRead.GET("", g.Viewer(), g.KBAccessRead("id"), handler.ListKnowledge)
@@ -129,6 +134,9 @@ func RegisterKnowledgeRoutes(r *gin.RouterGroup, handler *handler.KnowledgeHandl
 		// (k.DELETE("/:id"), k.POST("/:id/reparse"), k.PUT("/:id")).
 		kRead.GET("/batch", g.Viewer(), handler.GetKnowledgeBatch)
 		kRead.GET("/:id", g.Viewer(), g.KBAccessReadFromKnowledgeIDParam("id"), handler.GetKnowledge)
+		kRead.GET("/:id/video", g.Viewer(), g.KBAccessReadFromKnowledgeIDParam("id"), handler.GetVideo)
+		kRead.GET("/:id/media-status", g.Viewer(), g.KBAccessReadFromKnowledgeIDParam("id"), handler.GetVideoStatus)
+		kRead.POST("/:id/video/playback-token", g.Viewer(), g.KBAccessReadFromKnowledgeIDParam("id"), handler.CreateVideoPlaybackToken)
 		kRead.GET("/:id/stages", g.Viewer(), g.KBAccessReadFromKnowledgeIDParam("id"), handler.GetKnowledgeSpans)
 		kRead.GET("/:id/spans", g.Viewer(), g.KBAccessReadFromKnowledgeIDParam("id"), handler.GetKnowledgeSpans)
 		k.DELETE("/:id", g.OwnedKnowledgeKBOrAdmin(), g.KBAccessWriteFromKnowledgeIDParam("id"), handler.DeleteKnowledge)

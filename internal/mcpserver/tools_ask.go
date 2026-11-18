@@ -103,12 +103,13 @@ func askTool() mcp.Tool {
 }
 
 type askReference struct {
-	KnowledgeID    string     `json:"knowledge_id"`
-	KnowledgeTitle string     `json:"knowledge_title,omitempty"`
-	ChunkID        string     `json:"chunk_id"`
-	Score          float64    `json:"score,omitempty"`
-	Excerpt        string     `json:"excerpt"`
-	Images         []askImage `json:"images,omitempty"`
+	KnowledgeID    string                `json:"knowledge_id"`
+	KnowledgeTitle string                `json:"knowledge_title,omitempty"`
+	ChunkID        string                `json:"chunk_id"`
+	Score          float64               `json:"score,omitempty"`
+	Excerpt        string                `json:"excerpt"`
+	Images         []askImage            `json:"images,omitempty"`
+	Media          *types.MediaReference `json:"media,omitempty"`
 }
 
 // Keep image references separate from the truncated excerpt. OriginalURL is
@@ -520,6 +521,7 @@ func summarizeReferences(refs []*types.SearchResult) []askReference {
 			Score:          r.Score,
 			Excerpt:        truncateExcerpt(strings.TrimSpace(r.Content)),
 			Images:         summarizeReferenceImages(r.ImageInfo, nil),
+			Media:          r.Media,
 		})
 	}
 	return out

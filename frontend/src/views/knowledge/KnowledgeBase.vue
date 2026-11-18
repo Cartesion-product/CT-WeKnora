@@ -55,8 +55,10 @@ import BatchTagDialog from './components/BatchTagDialog.vue';
 import type { KnowledgeProcessOverrides } from '@/types/knowledgeProcess';
 import { useUploadConfirmStore, type UploadConfirmResult } from '@/stores/uploadConfirm';
 import { useUploadTasksStore } from '@/stores/uploadTasks';
+import { filterUploadFiles } from './utils/uploadSources';
 import WikiBrowser from './wiki/WikiBrowser.vue';
 import ImageGallery from './gallery/ImageGallery.vue';
+import VideoGallery from './components/VideoGallery.vue';
 import { getWikiStats } from '@/api/wiki';
 import {
   isKnowledgeParseInFlight,
@@ -97,7 +99,7 @@ const kbLoading = ref(false);
 const docListLoading = ref(true);
 const isFAQ = computed(() => (kbInfo.value?.type || '') === 'faq');
 const isWiki = computed(() => !!kbInfo.value?.indexing_strategy?.wiki_enabled);
-const validTabs = ['documents', 'wiki', 'graph', 'gallery'] as const
+const validTabs = ['documents', 'wiki', 'graph', 'gallery', 'video'] as const
 type KbTab = typeof validTabs[number]
 const initTab = validTabs.includes(route.query.tab as any) ? (route.query.tab as KbTab) : 'documents'
 const activeKbTab = ref<KbTab>(initTab);
@@ -130,6 +132,7 @@ const kbViewTabs = computed(() => {
     )
   }
   tabs.push({ key: 'gallery', icon: 'image', label: t(`${w}.tabGallery`), tip: t(`${w}.tabGalleryTip`) })
+  tabs.push({ key: 'video', icon: 'video', label: t('videoKnowledge.tab'), tip: t('videoKnowledge.tabTip') })
   return tabs
 })
 const shownKbTab = computed<KbTab>(() =>
@@ -247,7 +250,7 @@ const supportedFileTypes = computed<Set<string>>(() => {
 })
 
 const acceptFileTypes = computed(() =>
-  [...supportedFileTypes.value].map(t => '.' + t).join(',')
+  [...new Set([...supportedFileTypes.value, 'mp4'])].map(t => '.' + t).join(',')
 )
 
 const unsupportedFileTypes = computed<string[]>(() => {
@@ -708,6 +711,7 @@ const fileTypeOptions = computed(() => [
   { label: 'M4A', value: 'm4a' },
   { label: 'FLAC', value: 'flac' },
   { label: 'OGG', value: 'ogg' },
+  { label: 'MP4', value: 'mp4' },
 ]);
 const selectedParseStatus = ref('');
 const parseStatusOptions = computed(() => [
@@ -1349,7 +1353,14 @@ const handleKnowledgeFileDrop = (event: CustomEvent) => {
   const eventKbId = event.detail?.kbId;
   const files = Array.isArray(event.detail?.files) ? event.detail.files : [];
   if (eventKbId !== kbId.value || isFAQ.value || files.length === 0) return;
-  handleUploadSourceFiles(files);
+  const result = filterUploadFiles(files, {
+    supportedFileTypes: supportedFileTypes.value,
+    multiFile: files.length > 1,
+  });
+  if (result.videoFilteredCount) MessagePlugin.warning(t('error.unsupportedFileType'));
+  if (result.videoDisabledCount) MessagePlugin.warning(t('videoKnowledge.ingestDisabled', { count: result.videoDisabledCount }));
+  if (result.skippedCount) MessagePlugin.warning(t('knowledgeBase.filesSkippedNoEngine', { count: result.skippedCount }));
+  handleUploadSourceFiles(result.validFiles);
 };
 
 // Auto-open document detail when navigated with ?knowledge_id=xxx.
@@ -1479,6 +1490,7 @@ type KnowledgeCard = {
   type?: string;
   updated_at?: string;
   file_type?: string;
+  video?: { duration_ms: number; status: string; stage?: string; thumbnail_id?: string };
   isMore?: boolean;
   metadata?: any;
   error_message?: string;
@@ -1496,7 +1508,7 @@ type KnowledgeCard = {
 // graph extract still running), and a `completed` row whose summary
 // hasn't landed yet keeps polling so the description fills in.
 const needsStatusPolling = (item: KnowledgeCard) => {
-  return knowledgeNeedsStatusPolling(item);
+  return knowledgeNeedsStatusPolling(item) || item.video?.status === 'queued' || item.video?.status === 'processing';
 };
 
 // Back off once every in-flight row looks stuck: nothing is moving, and a
@@ -1554,7 +1566,7 @@ const updateStatus = (analyzeList: KnowledgeCard[], delay = STATUS_POLL_INTERVAL
 
           let parseStatus = item.parse_status;
           if (pendingReparseAck.has(item.id)) {
-            if (isParseInFlight(item.parse_status)) {
+            if (isParseInFlight(item.parse_status) || item.video?.status === 'queued' || item.video?.status === 'processing') {
               clearReparseAck(item.id);
             } else {
               parseStatus = 'pending';
@@ -1562,6 +1574,7 @@ const updateStatus = (analyzeList: KnowledgeCard[], delay = STATUS_POLL_INTERVAL
           }
 
           const card = cardList.value[index];
+          card.video = item.video;
           card.last_activity_at = item.last_activity_at;
           card.stall_state = item.stall_state;
           card.stalled_minutes = stalledMinutes({ parse_status: parseStatus, last_activity_at: item.last_activity_at });
@@ -1682,12 +1695,15 @@ const settleThenReload = async (
 };
 
 const openCardDetails = (item: KnowledgeCard) => {
+  sourceVideoTarget.value = undefined;
   isCardDetails.value = true;
   getCardDetails(item);
 };
 
 // Open source document preview from WikiBrowser
-const openSourceDoc = (knowledgeId: string) => {
+const sourceVideoTarget = ref<{ startMs: number; segmentId?: string; processingRunId?: string } | undefined>();
+const openSourceDoc = (knowledgeId: string, video?: { startMs: number; segmentId?: string; processingRunId?: string }) => {
+  sourceVideoTarget.value = video;
   isCardDetails.value = true;
   getCardDetails({ id: knowledgeId });
 };
@@ -2530,10 +2546,11 @@ const handleKBEditorSuccess = (kbIdValue: string) => {
 
       <!-- Image Gallery (4th tab) -->
       <ImageGallery v-if="activeKbTab === 'gallery' && kbId" :knowledge-base-id="kbId" :can-edit="canEdit" @open-source-doc="openSourceDoc" />
+      <VideoGallery v-if="activeKbTab === 'video' && kbId" :knowledge-base-id="kbId" @open-source-doc="openSourceDoc" />
 
       <!-- wiki/graph tabs only exist on wiki KBs; a stale tab (?tab= or one
            carried over from a previous KB) falls back to documents. -->
-      <template v-if="activeKbTab === 'documents' || (!isWiki && activeKbTab !== 'gallery')">
+      <template v-if="activeKbTab === 'documents' || (!isWiki && activeKbTab !== 'gallery' && activeKbTab !== 'video')">
         <div class="knowledge-main">
           <KbFolderTree v-if="showFolderTree && !folderTreeCollapsed" :tree="folderTree" :selected-path="selectedFolderPath"
             :loading="folderTreeLoading" :can-edit="canEdit" :root-label="kbInfo?.name"
@@ -2817,7 +2834,7 @@ const handleKBEditorSuccess = (kbIdValue: string) => {
 
       <!-- DocContent drawer (shared by documents tab and wiki source refs) -->
       <DocContent ref="docContentRef" :visible="isCardDetails" :details="details" :canEditKB="canEdit"
-        :canDownloadKB="canDownloadKnowledge" :kbId="kbId"
+        :canDownloadKB="canDownloadKnowledge" :kbId="kbId" :source-video-target="sourceVideoTarget"
         @closeDoc="closeDoc" @getDoc="getDoc" @summaryStateChange="syncDocumentSummaryState">
       </DocContent>
     </div>

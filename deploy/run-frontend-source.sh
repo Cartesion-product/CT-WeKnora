@@ -7,4 +7,4 @@ cd /work/frontend
 cp -a /opt/weknora/frontend/node_modules ./node_modules
 VITE_IS_DOCKER=true npm run build
 cp -a dist/. /usr/share/nginx/html/
-exec sh /usr/local/bin/weknora-frontend-entrypoint
+exec sh /source/frontend/docker-entrypoint.sh

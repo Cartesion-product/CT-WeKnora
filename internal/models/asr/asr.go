@@ -50,6 +50,27 @@ type ASR interface {
 	GetModelID() string
 }
 
+// FileTranscriber supports long media without loading decoded audio into memory.
+// Callers can use it when the configured ASR implementation provides it.
+type FileTranscriber interface {
+	TranscribeFile(ctx context.Context, path string) (*TranscriptionResult, error)
+}
+
+// Window is one completed source window. Text may be empty for silence; the
+// index still advances so a caller can persist an unambiguous resume point.
+type Window struct {
+	Index int     `json:"index"`
+	Start float64 `json:"start"`
+	End   float64 `json:"end"`
+	Text  string  `json:"text"`
+}
+
+// WindowFileTranscriber streams completed windows to the caller. startWindow
+// is zero-based and allows a retry to resume after its last saved window.
+type WindowFileTranscriber interface {
+	TranscribeFileWindows(ctx context.Context, path string, startWindow int, visit func(Window) error) error
+}
+
 // Config holds the configuration needed to create an ASR instance.
 type Config struct {
 	Source    types.ModelSource

@@ -1,4 +1,19 @@
 export default {
+  videoKnowledge: {
+    tabTip: '지식베이스의 동영상 보기', refresh: '동영상 새로고침', empty: '동영상이 없습니다', previousPage: '이전 페이지', nextPage: '다음 페이지',
+    parseTitle: '동영상 분석', parseDescription: '프레임과 화면 텍스트를 추출하고 영상 설명과 음성 전사를 추가할 수 있습니다.',
+    framePipeline: '프레임과 화면 텍스트', framePipelineDescription: '지식베이스의 FFmpeg 및 Tesseract OCR 설정을 사용합니다.',
+    frameInterval: '프레임 간격 (초)', maxFrames: '최대 프레임 수', ocrLanguage: '화면 텍스트 언어',
+    invalidConfig: '동영상 분석 설정을 확인하세요. 프레임 간격은 1–60초, 최대 프레임 수는 1–300이어야 합니다.',
+    ocrChineseEnglish: '중국어 + 영어', ocrChinese: '중국어', ocrEnglish: '영어',
+    visualDescription: '영상 설명 생성', transcription: '음성 전사', relatedVideos: '관련 동영상',
+    tab: '동영상', retry: '다시 시도', loadFailed: '동영상 세부 정보를 불러올 수 없습니다', ingestDisabled: '동영상 업로드가 비활성화되어 MP4 파일 {count}개를 건너뛰었습니다',
+    playbackFailed: '동영상을 재생할 수 없습니다', loadingPlayback: '동영상 불러오는 중',
+    duration: '길이', segments: '구간', noSegments: '아직 구간이 없습니다', loadMore: '구간 더 불러오기',
+    seek: '이 시간으로 이동', frame: '프레임',
+    sourceUpdated: '이 인용은 이전 동영상 버전의 것입니다. 자동 이동을 중지했습니다. 현재 구간을 확인하세요.',
+    modality: { asr: '음성', ocr: '화면 텍스트', vlm: '화면 설명' },
+  },
   documentProgress: {
     "queueView": "큐 작업",
     "title": "자료 및 Wiki 진행 상황",
@@ -8714,7 +8729,7 @@ export default {
     tagLabel: '태그',
     tagPlaceholder: '태그를 선택하세요',
     noTags: '태그 없음',
-    videosFilteredNoVLM: '{count}개의 동영상 파일을 건너됨 (동영상 업로드 미지원)',
+    videosFilteredNoVLM: '{count}개의 동영상 파일을 건너뜀 (현재 MP4만 지원)',
     unsupportedTypesHint: '일부 문서 유형({types})에 사용 가능한 파서 엔진이 없어 처리할 수 없습니다',
     goToParserSettings: '설정으로 이동',
     importURL: '웹페이지 가져오기',
@@ -9311,6 +9326,7 @@ export default {
       spreadsheet: '스프레드시트',
       presentation: '프레젠테이션',
       image: '이미지',
+      video: '동영상',
       web: '웹 페이지',
       data: '데이터'
     },

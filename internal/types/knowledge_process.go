@@ -1,5 +1,11 @@
 package types
 
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"fmt"
+)
+
 // KnowledgeProcessOverrides stores per-upload parse config overrides in knowledge metadata.
 type KnowledgeProcessOverrides struct {
 	// SummaryEnabled defaults to true when omitted for backward compatibility.
@@ -44,6 +50,7 @@ type EffectiveProcessConfig struct {
 	EnableMultimodel         bool
 	VLMConfig                VLMConfig
 	ASRConfig                ASRConfig
+	VideoConfig              VideoProcessConfig
 	QuestionGenerationConfig QuestionGenerationConfig
 	GraphEnabled             bool
 	ImageAttrsEnabled        bool
@@ -57,4 +64,50 @@ type EffectiveProcessConfig struct {
 	// the same map, so what ran and what was recorded cannot disagree.
 	ImagePipelineParams map[string]any
 	ExtractConfig       ExtractConfig
+}
+
+// VideoProcessConfig controls the bounded frame extraction and OCR pipeline.
+type VideoProcessConfig struct {
+	FrameIntervalSeconds int    `json:"frame_interval_seconds"`
+	MaxFrames            int    `json:"max_frames"`
+	OCRLanguage          string `json:"ocr_language"`
+}
+
+func DefaultVideoProcessConfig() VideoProcessConfig {
+	return VideoProcessConfig{FrameIntervalSeconds: 15, MaxFrames: 120, OCRLanguage: "chi_sim+eng"}
+}
+
+func (c VideoProcessConfig) Effective() VideoProcessConfig {
+	if c == (VideoProcessConfig{}) {
+		return DefaultVideoProcessConfig()
+	}
+	return c
+}
+
+func (c VideoProcessConfig) Validate() error {
+	if c.FrameIntervalSeconds < 1 || c.FrameIntervalSeconds > 60 || c.MaxFrames < 1 || c.MaxFrames > 300 {
+		return fmt.Errorf("视频抽帧间隔需为 1-60 秒，最大帧数需为 1-300")
+	}
+	switch c.OCRLanguage {
+	case "eng", "chi_sim", "chi_sim+eng":
+		return nil
+	default:
+		return fmt.Errorf("不支持的视频 OCR 语言")
+	}
+}
+
+func (c VideoProcessConfig) Value() (driver.Value, error) { return json.Marshal(c) }
+
+func (c *VideoProcessConfig) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	switch b := value.(type) {
+	case []byte:
+		return json.Unmarshal(b, c)
+	case string:
+		return json.Unmarshal([]byte(b), c)
+	default:
+		return fmt.Errorf("invalid video config database value %T", value)
+	}
 }

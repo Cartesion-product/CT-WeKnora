@@ -130,6 +130,9 @@ const (
 // with a flat switch. It needs the group's running lastIndex for the untrusted
 // sequentiality check.
 func classifyMerge(lastChunk *types.SearchResult, lastIndex int, current *types.SearchResult) mergeSituation {
+	if lastChunk.Media != nil || current.Media != nil {
+		return mergeSeparate
+	}
 	if chunkTrusted(lastChunk) && chunkTrusted(current) && current.StartAt >= lastChunk.StartAt {
 		switch {
 		case current.StartAt > lastChunk.EndAt:

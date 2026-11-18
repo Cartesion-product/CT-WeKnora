@@ -103,6 +103,9 @@
                     <div class="reference-item__document-main">
                       <div class="reference-item__title-row">
                         <h5 class="reference-item__title" :title="item.title">{{ item.title }}</h5>
+                        <span v-if="item.media?.type === 'video' && (item.media.start_ms ?? item.media.frame_ms) !== undefined" class="reference-item__video-time">
+                          {{ formatMediaTime((item.media.start_ms ?? item.media.frame_ms)!) }}<template v-if="item.media.end_ms !== undefined"> - {{ formatMediaTime(item.media.end_ms) }}</template>
+                        </span>
                         <button
                           v-if="canOpenSource(item)"
                           type="button"
@@ -278,6 +281,7 @@ function openItemSource(item: ReferenceListItem) {
     knowledgeBaseId: item.knowledgeBaseId,
     title: item.title,
     fileName: item.fileName,
+    media: item.media,
   })
 }
 
@@ -384,10 +388,20 @@ function getDocumentHref(item: ReferenceListItem) {
   if (!item.knowledgeBaseId) return ''
   const query: Record<string, string> = {}
   if (item.knowledgeId) query.knowledge_id = item.knowledgeId
+  if (item.media?.type === 'video') {
+    if (item.media.segment_id) query.segment_id = item.media.segment_id
+    const position = item.media.start_ms ?? item.media.frame_ms
+    if (position !== undefined) query.start_ms = String(position)
+  }
   return router.resolve({
     path: `/platform/knowledge-bases/${item.knowledgeBaseId}`,
     query,
   }).href
+}
+
+function formatMediaTime(ms: number) {
+  const seconds = Math.max(0, Math.floor(ms / 1000))
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 }
 
 function shouldShowItemTitle(item: ReferenceListItem) {
@@ -700,6 +714,13 @@ watch(visible, (open) => {
   align-items: flex-start;
   gap: 8px;
   min-width: 0;
+}
+
+.reference-item__video-time {
+  flex-shrink: 0;
+  color: var(--td-text-color-secondary);
+  font-size: var(--app-text-sm);
+  white-space: nowrap;
 }
 
 .reference-item__title {

@@ -26,6 +26,7 @@ export interface WikiPage {
   depth?: number;
   sort_order?: number;
   source_refs: string[];
+  chunk_refs?: string[];
   in_links: string[];
   // Present on page detail responses; list and mutation responses omit it.
   in_link_titles?: Record<string, string>;
@@ -82,7 +83,7 @@ export interface WikiGraphMeta {
 }
 
 export interface WikiGraphData {
-  nodes: { slug: string; title: string; page_type: string; link_count: number; familiar?: boolean }[];
+  nodes: { slug: string; title: string; page_type: string; link_count: number; familiar?: boolean; video_source_ids?: string[] }[];
   edges: { source: string; target: string }[];
   meta: WikiGraphMeta;
 }

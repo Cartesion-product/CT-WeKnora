@@ -726,9 +726,10 @@ type WikiGraphMeta struct {
 
 // WikiGraphNode represents a node in the wiki link graph
 type WikiGraphNode struct {
-	Slug     string `json:"slug"`
-	Title    string `json:"title"`
-	PageType string `json:"page_type"`
+	Slug           string   `json:"slug"`
+	Title          string   `json:"title"`
+	PageType       string   `json:"page_type"`
+	VideoSourceIDs []string `json:"video_source_ids,omitempty"`
 	// Number of inbound + outbound links
 	LinkCount int `json:"link_count"`
 	// Familiar is true when this page was built from a document this person

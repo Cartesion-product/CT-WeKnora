@@ -1,6 +1,6 @@
 import { kbFileTypeVerification } from '@/utils'
 
-export const UPLOAD_VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv']
+export const UPLOAD_VIDEO_EXTENSIONS = ['mov', 'avi', 'mkv', 'webm', 'wmv', 'flv']
 
 export function getUploadFileExt(file: File): string {
   const dot = file.name.lastIndexOf('.')
@@ -23,6 +23,7 @@ export interface FilterUploadFilesResult {
   validFiles: File[]
   skippedCount: number
   videoFilteredCount: number
+  videoDisabledCount: number
   hiddenFileCount: number
 }
 
@@ -44,8 +45,11 @@ export function filterUploadFiles(
   const validFiles: File[] = []
   let skippedCount = 0
   let videoFilteredCount = 0
+  let videoDisabledCount = 0
   let hiddenFileCount = 0
   const multiFile = options.multiFile ?? list.length > 1
+  const videoEnabled = (window as Window & { __RUNTIME_CONFIG__?: { VIDEO_INGEST_ENABLED?: boolean } })
+    .__RUNTIME_CONFIG__?.VIDEO_INGEST_ENABLED === true || import.meta.env.VITE_VIDEO_INGEST_ENABLED === '1'
 
   for (const file of list) {
     if (options.fromFolder) {
@@ -62,6 +66,11 @@ export function filterUploadFiles(
       continue
     }
 
+    if (fileExt === 'mp4') {
+      if (videoEnabled) validFiles.push(file)
+      else videoDisabledCount++
+      continue
+    }
     if (kbFileTypeVerification(file, multiFile, dynamicTypes)) {
       skippedCount++
       continue
@@ -70,5 +79,5 @@ export function filterUploadFiles(
     validFiles.push(file)
   }
 
-  return { validFiles, skippedCount, videoFilteredCount, hiddenFileCount }
+  return { validFiles, skippedCount, videoFilteredCount, videoDisabledCount, hiddenFileCount }
 }

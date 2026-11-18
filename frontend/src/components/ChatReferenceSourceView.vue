@@ -46,6 +46,10 @@
       @located="onLocated"
     />
 
+    <VideoKnowledgeDetail v-else-if="mode === 'video'" class="reference-source__preview"
+      :knowledge-id="target.knowledgeId" :active="active" :start-ms="target.media?.start_ms ?? target.media?.frame_ms"
+      :segment-id="target.media?.segment_id" :processing-run-id="target.media?.processing_run_id" />
+
     <div v-else-if="mode === 'web'" class="reference-source__web">
       <p class="reference-source__quote">{{ webQuote }}</p>
       <t-button theme="primary" variant="outline" size="small" @click="openWebSource">
@@ -64,6 +68,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DocumentPreview from '@/components/document-preview.vue'
+import VideoKnowledgeDetail from '@/components/VideoKnowledgeDetail.vue'
 import ArtifactFileIcon from '@/views/chat/components/ArtifactFileIcon.vue'
 import { getChunkByIdOnly, getKnowledgeDetails } from '@/api/knowledge-base/index'
 import { isKnownPreviewableFile } from '@/utils/filePreview'
@@ -94,7 +99,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const router = useRouter()
 
-type Mode = 'loading' | 'file' | 'web' | 'none'
+type Mode = 'loading' | 'file' | 'video' | 'web' | 'none'
 type Status = 'idle' | 'locating' | 'found' | 'page' | 'block' | 'ambiguous' | 'stale' | 'missing' | 'partial'
 
 const mode = ref<Mode>('loading')
@@ -124,9 +129,16 @@ const isManual = computed(() => meta.knowledgeSource === 'manual' ||
 
 const documentHref = computed(() => {
   if (!props.target.knowledgeBaseId) return ''
+  const query: Record<string, string> = { knowledge_id: props.target.knowledgeId }
+  if (props.target.media?.type === 'video') {
+    if (props.target.media.segment_id) query.segment_id = props.target.media.segment_id
+    const position = props.target.media.start_ms ?? props.target.media.frame_ms
+    if (position !== undefined) query.start_ms = String(position)
+    if (props.target.media.processing_run_id) query.processing_run_id = props.target.media.processing_run_id
+  }
   return router.resolve({
     path: `/platform/knowledge-bases/${props.target.knowledgeBaseId}`,
-    query: { knowledge_id: props.target.knowledgeId },
+    query,
   }).href
 })
 
@@ -271,6 +283,7 @@ async function loadChunk(version: number) {
 function resolveMode(): Mode {
   const type = (meta.knowledgeType || meta.fileType || '').toLowerCase()
   if (type === 'faq' || props.target.chunkType === 'faq') return 'none'
+  if (props.target.media?.type === 'video' || meta.fileType.toLowerCase() === 'mp4') return 'video'
   if (isManual.value) return 'file'
   if (meta.fileName && isKnownPreviewableFile(meta.fileName, meta.fileType)) return 'file'
   if (isWebUrl(meta.knowledgeSource)) return 'web'

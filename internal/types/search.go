@@ -159,6 +159,9 @@ type MatchedImage struct {
 type SearchResult struct {
 	// CitationSources retains independently citeable bodies after context expansion.
 	CitationSources []*SearchResult `json:"-" gorm:"-"`
+	// Media identifies the exact source window or frame when this result comes
+	// from a published video run. Absent for existing document results.
+	Media *MediaReference `json:"media,omitempty" gorm:"-"`
 	// ID
 	ID string `gorm:"column:id"              json:"id" extensions:"x-agent=chunk_id"`
 	// Content

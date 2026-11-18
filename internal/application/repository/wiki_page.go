@@ -1322,6 +1322,17 @@ func (r *wikiPageRepository) ListAll(ctx context.Context, kbID string) ([]*types
 	return pages, nil
 }
 
+// ListActiveVideoKnowledgeIDs supplies the graph with playable video sources.
+func (r *wikiPageRepository) ListActiveVideoKnowledgeIDs(ctx context.Context, kbID string) ([]string, error) {
+	var ids []string
+	err := r.db.WithContext(ctx).Table("video_assets AS asset").
+		Joins("JOIN knowledges AS k ON k.id = asset.knowledge_id AND k.tenant_id = asset.tenant_id").
+		Where("k.knowledge_base_id = ? AND LOWER(k.file_type) IN ? AND k.deleted_at IS NULL AND asset.active_run_id <> ''",
+			kbID, []string{"mp4", "mov", "avi", "mkv", "webm", "wmv", "flv"}).
+		Pluck("asset.knowledge_id", &ids).Error
+	return ids, err
+}
+
 // ListRecentForSuggestions returns recent user-visible wiki pages across the given
 // knowledge bases, used as a fallback source for agent suggested questions when
 // the KB has no FAQ entries or AI-generated document questions (typical for

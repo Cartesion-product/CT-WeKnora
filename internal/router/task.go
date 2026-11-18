@@ -35,6 +35,8 @@ type AsynqTaskParams struct {
 	MaintenanceServer    *asynq.Server `name:"maintenanceAsynqServer"`
 	SharedServer         *asynq.Server `name:"sharedAsynqServer"`
 	WikiServer           *asynq.Server `name:"wikiAsynqServer"`
+	MediaServer          *asynq.Server `name:"mediaAsynqServer"`
+	VideoProcessor       *service.VideoProcessor
 	KnowledgeService     interfaces.KnowledgeService
 	KnowledgeBaseService interfaces.KnowledgeBaseService
 	TagService           interfaces.KnowledgeTagService
@@ -227,6 +229,10 @@ func NewWikiAsynqServer(svc interfaces.SystemSettingService) *asynq.Server {
 	return newAsynqServer(concurrency, types.QueueWeightsForPool(types.WorkerPoolWiki))
 }
 
+func NewMediaAsynqServer() *asynq.Server {
+	return newAsynqServer(1, types.QueueWeightsForPool(types.WorkerPoolMedia))
+}
+
 func RunAsynqServer(params AsynqTaskParams) *asynq.ServeMux {
 	// Create a new mux and register all handlers
 	mux := asynq.NewServeMux()
@@ -268,6 +274,7 @@ func RunAsynqServer(params AsynqTaskParams) *asynq.ServeMux {
 
 	// Register document processing handler
 	mux.HandleFunc(types.TypeDocumentProcess, params.KnowledgeService.ProcessDocument)
+	mux.HandleFunc(types.TypeVideoProcess, params.VideoProcessor.Handle)
 	mux.HandleFunc(types.TypeTemporaryDocumentProcess, params.TemporaryDocument.Process)
 
 	// Register manual knowledge processing handler (cleanup + re-indexing)
@@ -329,12 +336,19 @@ func RunAsynqServer(params AsynqTaskParams) *asynq.ServeMux {
 			}
 		}()
 	}
-	runPool("core-pool", params.CoreServer)
-	runPool("postprocess-pool", params.PostProcessServer)
-	runPool("enrichment-pool", params.EnrichmentServer)
-	runPool("maintenance-pool", params.MaintenanceServer)
-	runPool("shared-pool", params.SharedServer)
-	runPool("wiki-pool", params.WikiServer)
+	if os.Getenv("WEKNORA_WORKER_MODE") == "media" {
+		runPool("media-pool", params.MediaServer)
+	} else {
+		runPool("core-pool", params.CoreServer)
+		runPool("postprocess-pool", params.PostProcessServer)
+		runPool("enrichment-pool", params.EnrichmentServer)
+		runPool("maintenance-pool", params.MaintenanceServer)
+		runPool("shared-pool", params.SharedServer)
+		runPool("wiki-pool", params.WikiServer)
+		if os.Getenv("WEKNORA_MEDIA_WORKER_EXTERNAL") != "1" {
+			runPool("media-pool", params.MediaServer)
+		}
+	}
 	return mux
 }
 

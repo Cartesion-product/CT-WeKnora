@@ -1,4 +1,19 @@
 export default {
+  videoKnowledge: {
+    tabTip: 'ナレッジベースの動画を表示', refresh: '動画を更新', empty: '動画はありません', previousPage: '前のページ', nextPage: '次のページ',
+    parseTitle: '動画の解析', parseDescription: 'フレームと画面内の文字を抽出し、映像の説明と音声文字起こしを追加できます。',
+    framePipeline: 'フレームと画面内の文字', framePipelineDescription: 'ナレッジベースの FFmpeg と Tesseract OCR 設定を使用します。',
+    frameInterval: '抽出間隔（秒）', maxFrames: '最大フレーム数', ocrLanguage: '画面文字の言語',
+    invalidConfig: '動画の解析設定を確認してください。抽出間隔は 1–60 秒、最大フレーム数は 1–300 です。',
+    ocrChineseEnglish: '中国語 + 英語', ocrChinese: '中国語', ocrEnglish: '英語',
+    visualDescription: '映像を説明', transcription: '音声を文字起こし', relatedVideos: '関連動画',
+    tab: '動画', retry: '再試行', loadFailed: '動画の詳細を読み込めません', ingestDisabled: '動画のアップロードは無効です。MP4 を {count} 件スキップしました',
+    playbackFailed: '動画を再生できません', loadingPlayback: '動画を読み込み中',
+    duration: '長さ', segments: 'セグメント', noSegments: 'セグメントはまだありません', loadMore: 'セグメントをさらに読み込む',
+    seek: 'この時刻に移動', frame: 'フレーム',
+    sourceUpdated: 'この引用は旧バージョンの動画です。自動移動を停止しました。現在の区間を確認してください。',
+    modality: { asr: '音声', ocr: '画面の文字', vlm: '映像の説明' },
+  },
   documentProgress: {
     "queueView": "キュータスク",
     "title": "資料と Wiki の進捗",
@@ -555,6 +570,7 @@ export default {
       spreadsheet: 'スプレッドシート',
       presentation: 'プレゼンテーション',
       image: '画像',
+      video: '動画',
       web: 'Web ページ',
       data: 'データ'
     },
@@ -1072,7 +1088,7 @@ export default {
     tagLabel: 'タグ',
     tagPlaceholder: 'タグを選択',
     noTags: 'タグなし',
-    videosFilteredNoVLM: '{count}件の動画ファイルをスキップしました（動画のアップロードには対応していません）',
+    videosFilteredNoVLM: '{count}件の動画ファイルをスキップしました（現在は MP4 のみ対応）',
     unsupportedTypesHint: '一部のドキュメント形式（{types}）は利用できる解析エンジンがないため、アップロードしても解析できません',
     goToParserSettings: '設定を開く',
     importURL: 'URLからインポート',

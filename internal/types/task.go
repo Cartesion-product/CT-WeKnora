@@ -10,6 +10,7 @@ const (
 	WorkerPoolMaintenance = "maintenance"
 	WorkerPoolShared      = "shared"
 	WorkerPoolWiki        = "wiki"
+	WorkerPoolMedia       = "media"
 
 	// Upstream defaults are explicit guarantees plus an elastic pool. The
 	// shared pool may consume core and enrichment queues, so idle capacity in
@@ -42,6 +43,7 @@ const (
 	QueueSync           = "sync"
 	QueueMaintenance    = "low"
 	QueueWiki           = "wiki"
+	QueueMedia          = "media"
 	// QueueMemory carries debounced long-term memory distillation. It sits in
 	// the enrichment pool because it is a background LLM call whose latency
 	// nobody is waiting on.
@@ -85,6 +87,7 @@ var queueDefinitions = []QueueDefinition{
 		TypeKnowledgeListDelete, TypeKnowledgeListReparse, TypeKnowledgeMove,
 	}},
 	{Name: QueueWiki, Pool: WorkerPoolWiki, Weight: 1, TaskTypes: []string{TypeWikiIngest, TypeWikiFinalize}},
+	{Name: QueueMedia, Pool: WorkerPoolMedia, Weight: 1, TaskTypes: []string{TypeVideoProcess}},
 }
 
 // QueueDefinitions returns a copy so callers cannot mutate global topology.
@@ -233,6 +236,7 @@ type WorkerServerStat struct {
 
 const (
 	TypeChunkExtract             = "chunk:extract"
+	TypeVideoProcess             = "video:process"
 	TypeDocumentProcess          = "document:process"           // 文档处理任务
 	TypeFAQImport                = "faq:import"                 // FAQ导入任务（包含dry run模式）
 	TypeQuestionGeneration       = "question:generation"        // 问题生成任务

@@ -5,6 +5,8 @@ import { formatFileSize } from '@/utils/files';
 import { formatReferenceSnippet } from '@/utils/referenceSources';
 import KnowledgeTagPopover from './KnowledgeTagPopover.vue';
 import DocumentFileIcon from './DocumentFileIcon.vue';
+import VideoThumbnail from './VideoThumbnail.vue';
+import { formatVideoDuration, type VideoListInfo } from '@/api/knowledge-base/video';
 import DocumentActionMenu from './DocumentActionMenu.vue';
 import FolderPickerMenu, { type FolderOption } from './FolderPickerMenu.vue';
 import KnowledgeProcessingTimeline from '@/components/knowledge-processing-timeline.vue';
@@ -34,6 +36,7 @@ interface KnowledgeCard {
   source?: string;
   created_at?: string;
   file_size?: number | string;
+  video?: VideoListInfo;
   channel?: string;
 }
 
@@ -379,6 +382,8 @@ const handleAction = (action: 'download' | 'edit' | 'view-trace' | 'reparse' | '
           <div class="card-file-icon" :title="[getKnowledgeType(item), formatFileSize(Number(item.file_size))].filter(Boolean).join(' · ')">
             <DocumentFileIcon :source-type="item.type"
               :file-name="item.file_type ? `document.${item.file_type.toLowerCase()}` : (item.original_file_name || item.file_name || '')" />
+            <VideoThumbnail v-if="item.video?.thumbnail_id" class="card-video-thumbnail"
+              :knowledge-id="item.id" :frame-id="item.video.thumbnail_id" />
           </div>
           <button type="button" class="card-content-title" :title="item.file_name"
             @click.stop="onCardClick(item)">{{ item.file_name }}</button>
@@ -548,6 +553,14 @@ const handleAction = (action: 'download' | 'edit' | 'view-trace' | 'reparse' | '
             <t-icon name="chart-line" />
           </button>
         </div>
+        <div v-else-if="item.video?.status === 'queued' || item.video?.status === 'processing'" class="card-analyze">
+          <t-icon :name="item.video.status === 'queued' ? 'time' : 'loading'" class="card-analyze-loading" />
+          <span class="card-analyze-txt">{{ t(item.video.status === 'queued' ? 'knowledgeBase.statusQueued' : 'knowledgeBase.statusProcessing') }}</span>
+        </div>
+        <div v-else-if="item.video?.status === 'failed'" class="card-analyze failure card-analyze-trace">
+          <t-icon name="close-circle" class="card-analyze-loading failure" />
+          <span class="card-analyze-txt failure">{{ t('knowledgeBase.statusFailed') }}</span>
+        </div>
         <div v-else-if="item.parse_status === 'failed'" class="card-analyze failure card-analyze-trace">
           <t-icon name="close-circle" class="card-analyze-loading failure"></t-icon>
           <span
@@ -614,7 +627,9 @@ const handleAction = (action: 'download' | 'edit' | 'view-trace' | 'reparse' | '
           <t-icon name="folder" />
           <span>{{ item.folder_path }}</span>
         </button>
-        <span v-else class="card-time" :title="t('knowledgeBase.columnUpdatedAt')">{{ formatDocTime(item.updated_at) }}</span>
+        <span v-else class="card-time" :title="t('knowledgeBase.columnUpdatedAt')">
+          <template v-if="item.video?.duration_ms">{{ formatVideoDuration(item.video.duration_ms) }} · </template>{{ formatDocTime(item.updated_at) }}
+        </span>
       </div>
     </div>
       </div>
@@ -862,6 +877,7 @@ const handleAction = (action: 'download' | 'edit' | 'view-trace' | 'reparse' | '
     width: 26px;
     height: 31px;
     > :deep(*) { transform: scale(0.8125); transform-origin: top left; }
+    > .card-video-thumbnail { position: absolute; inset: 0; width: 100%; height: 100%; transform: none; }
   }
   .card-nav-check {
     flex-shrink: 0;

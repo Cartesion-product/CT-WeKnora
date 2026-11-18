@@ -2,7 +2,7 @@
  * Type filters for the artifact library page. The server filters by an
  * extension allowlist, so each category is just the extensions it covers.
  */
-export type ArtifactCategory = 'all' | 'document' | 'spreadsheet' | 'presentation' | 'image' | 'web' | 'data'
+export type ArtifactCategory = 'all' | 'document' | 'spreadsheet' | 'presentation' | 'image' | 'video' | 'web' | 'data'
 
 export const ARTIFACT_CATEGORIES: ArtifactCategory[] = [
   'all',
@@ -10,6 +10,7 @@ export const ARTIFACT_CATEGORIES: ArtifactCategory[] = [
   'spreadsheet',
   'presentation',
   'image',
+  'video',
   'web',
   'data',
 ]
@@ -19,6 +20,7 @@ const CATEGORY_EXTENSIONS: Record<Exclude<ArtifactCategory, 'all'>, string[]> = 
   spreadsheet: ['.xlsx', '.xls', '.csv', '.tsv', '.ods'],
   presentation: ['.pptx', '.ppt', '.key', '.odp'],
   image: ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp'],
+  video: ['.mp4', '.webm', '.mov', '.m4v', '.ogv'],
   web: ['.html', '.htm'],
   data: ['.json', '.xml', '.yaml', '.yml', '.zip'],
 }

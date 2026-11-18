@@ -77,6 +77,10 @@
               <span class="legend-dot" style="background: #0052d9"></span>
               {{ $t('knowledgeEditor.wikiBrowser.filterSummary') }}
             </div>
+            <div v-if="graphVideoCount" class="legend-item">
+              <t-icon name="play-circle" />
+              {{ $t('videoKnowledge.tab') }} {{ graphVideoCount }}
+            </div>
             <div class="legend-item clickable" :class="{ disabled: !graphFilterTypes.has('entity') }"
               @click="toggleGraphFilterType('entity')">
               <span class="legend-dot" style="background: #2ba471"></span>
@@ -172,6 +176,10 @@
               <t-tag size="small" :theme="getTypeTheme(graphDrawerPage.page_type)" variant="light-outline">
                 {{ getTypeLabel(graphDrawerPage.page_type) }}
               </t-tag>
+              <t-tag v-if="graphDrawerNode?.page_type === 'summary' && graphDrawerNode.video_source_ids?.length"
+                size="small" theme="primary" variant="light-outline">
+                <t-icon name="play-circle" /> {{ $t('videoKnowledge.tab') }}
+              </t-tag>
               <span class="wiki-reader-meta-text">{{ $t('knowledgeEditor.wikiBrowser.version', {
                 ver:
                   graphDrawerPage.version
@@ -193,8 +201,23 @@
             </div>
             <div ref="drawerBodyRef" class="wiki-reader-body" v-html="graphDrawerContent"
               @click="handleGraphDrawerClick"></div>
+            <footer v-if="graphDrawerSourceRefs.length" class="wiki-reader-footer graph-source-footer">
+              <span class="wiki-reader-footer-label">{{ $t('knowledgeEditor.wikiBrowser.sources') }}</span>
+              <div class="graph-source-links">
+                <button v-for="source in graphDrawerSourceRefs" :key="source.id" type="button"
+                  class="graph-source-link" @click="openGraphSource(source.id, source.video)">
+                  <t-icon :name="source.video ? 'play-circle' : 'file'" />
+                  <span>{{ source.title }}</span>
+                </button>
+              </div>
+            </footer>
           </template>
         </t-drawer>
+        <t-dialog v-model:visible="graphVideoDialogVisible" :header="graphVideoTitle" :footer="false"
+          width="min(960px, 94vw)" destroy-on-close>
+          <VideoKnowledgeDetail v-if="graphVideoKnowledgeId" :knowledge-id="graphVideoKnowledgeId"
+            :active="graphVideoDialogVisible" />
+        </t-dialog>
       </div>
     </template>
 
@@ -636,8 +659,8 @@
                 <div v-if="parsedSourceRefs.length" class="wiki-reader-footer-row">
                   <span class="wiki-reader-footer-label">{{ $t('knowledgeEditor.wikiBrowser.sources') }}</span>
                   <span class="wiki-reader-footer-value">
-                    <a v-for="ref in parsedSourceRefs" :key="ref.id" href="#" class="wiki-content-link"
-                      @click.prevent="emit('open-source-doc', ref.id)">
+                    <a v-for="ref in parsedSourceRefs" :key="ref.key" href="#" class="wiki-content-link"
+                      @click.prevent="emit('open-source-doc', ref.id, ref.startMs === undefined ? undefined : { startMs: ref.startMs, segmentId: ref.segmentId })">
                       {{ ref.title }}
                     </a>
                   </span>
@@ -838,6 +861,8 @@ import {
 import { resolveWikiBacklinkTitle } from './wikiBacklinkTitles'
 import { buildGraphLayout, graphNodeRadius, stepGraphLayout, visibleGraphLabels, graphPointBounds, initialGraphViewport, graphClusterOutline, graphLandmarkTitle, graphDetailSlugs, graphDetailLevelForSlug, GRAPH_DETAIL_MAX, type GraphBounds, type GraphCluster, type LayoutPlacement } from './wikiGraphLayout'
 import { getKnowledgeDetails } from '@/api/knowledge-base'
+import { getVideoDetail, type VideoSegment } from '@/api/knowledge-base/video'
+import VideoKnowledgeDetail from '@/components/VideoKnowledgeDetail.vue'
 import { useAssistantStore } from '@/stores/assistant'
 import AssistantButton from '@/components/assistant/AssistantButton.vue'
 import AssistantActionsButton from '@/components/assistant/AssistantActionsButton.vue'
@@ -888,7 +913,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'open-source-doc', knowledgeId: string): void
+  (e: 'open-source-doc', knowledgeId: string, video?: { startMs: number; segmentId?: string }): void
   (e: 'status-change', payload: { pendingTasks: number; isActive: boolean; pendingIssues: number }): void
   (e: 'view-graph', slug: string): void
 }>()
@@ -1034,6 +1059,8 @@ const showGlobalIssuesDrawer = ref(false)
 const globalIssues = ref<WikiPageIssue[]>([])
 const stats = ref<WikiStats | null>(null)
 const graphData = ref<WikiGraphData | null>(null)
+const graphVideoCount = computed(() => graphData.value?.nodes.filter(node =>
+  node.page_type === 'summary' && node.video_source_ids?.length).length || 0)
 const searchQuery = ref('')
 const graphSearchValue = ref('')
 const graphRef = ref<HTMLElement | null>(null)
@@ -1267,6 +1294,22 @@ function fitGraphToView() {
 
 const graphDrawerVisible = ref(false)
 const graphDrawerPage = ref<WikiPage | null>(null)
+const graphDrawerNode = computed(() => graphData.value?.nodes.find(node => node.slug === graphDrawerPage.value?.slug))
+const graphDrawerSourceRefs = computed(() => (graphDrawerPage.value?.source_refs || []).map(raw => {
+  const source = parseSourceRefEntry(raw)
+  return { ...source, video: graphDrawerNode.value?.video_source_ids?.includes(source.id) || false }
+}))
+const graphVideoKnowledgeId = ref('')
+const graphVideoTitle = computed(() => graphDrawerSourceRefs.value.find(source => source.id === graphVideoKnowledgeId.value)?.title || t('videoKnowledge.tab'))
+const graphVideoDialogVisible = computed({
+  get: () => !!graphVideoKnowledgeId.value,
+  set: (visible: boolean) => { if (!visible) graphVideoKnowledgeId.value = '' },
+})
+
+function openGraphSource(id: string, video: boolean) {
+  if (video) graphVideoKnowledgeId.value = id
+  else emit('open-source-doc', id)
+}
 const navHistory = ref<WikiPage[]>([])
 // navFromSystemView remembers that the user was viewing the Index when they
 // clicked into a slug, so goBack can restore it
@@ -1373,7 +1416,12 @@ const hasContentPages = computed(() => {
 // Pipeline ingest stores source_refs as bare knowledge IDs (see wiki_ingest_batch)
 // so filenames do not leak into LLM citation strings. Resolve titles for display.
 const sourceRefTitleCache = reactive<Record<string, string>>({})
+const sourceRefVideoSegments = ref<Record<string, VideoSegment[]>>({})
 let sourceRefTitleRequestSeq = 0
+
+function isVideoFileType(fileType: unknown): boolean {
+  return ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv'].includes(String(fileType || '').toLowerCase())
+}
 
 function parseSourceRefEntry(ref: string): { id: string; title: string } {
   const pipeIdx = ref.indexOf('|')
@@ -1390,15 +1438,37 @@ function parseSourceRefEntry(ref: string): { id: string; title: string } {
   }
 }
 
-const parsedSourceRefs = computed(() => {
+type WikiSourceLink = { id: string; title: string; key: string; startMs?: number; segmentId?: string }
+const parsedSourceRefs = computed<WikiSourceLink[]>(() => {
   if (!selectedPage.value?.source_refs?.length) return []
-  return selectedPage.value.source_refs.map(parseSourceRefEntry)
+  return selectedPage.value.source_refs.flatMap<WikiSourceLink>(raw => {
+    const source = parseSourceRefEntry(raw)
+    const segments = sourceRefVideoSegments.value[source.id] || []
+    if (!segments.length) return [{ ...source, key: source.id }]
+    return segments.map(segment => ({
+      ...source,
+      key: `${source.id}:${segment.segment_id}`,
+      title: `${source.title} ${formatSourceVideoTime(segment.start_ms)}`,
+      startMs: segment.start_ms,
+      segmentId: segment.segment_id,
+    }))
+  })
 })
 
-async function hydrateSourceRefTitles(refs: string[]) {
-  const ids = refs.filter((ref) => ref.indexOf('|') < 0 && !sourceRefTitleCache[ref])
-  if (!ids.length) return
+function formatSourceVideoTime(ms: number): string {
+  const seconds = Math.floor(ms / 1000)
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor(seconds / 60) % 60
+  const rest = seconds % 60
+  return hours ? `${hours}:${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`
+    : `${minutes}:${String(rest).padStart(2, '0')}`
+}
+
+async function hydrateSourceRefTitles(refs: string[], chunkRefs: string[]) {
+  const ids = [...new Set(refs.map(ref => parseSourceRefEntry(ref).id))]
   const seq = ++sourceRefTitleRequestSeq
+  sourceRefVideoSegments.value = {}
+  const chunkIDs = new Set(chunkRefs)
   for (const id of ids) {
     try {
       const res = await getKnowledgeDetails(id)
@@ -1406,6 +1476,14 @@ async function hydrateSourceRefTitles(refs: string[]) {
       const data = (res as any)?.data ?? res
       const title = data?.title || data?.file_name || data?.fileName
       if (title) sourceRefTitleCache[id] = title
+      if (chunkIDs.size && isVideoFileType(data?.file_type)) {
+        const video = await getVideoDetail(id)
+        if (seq !== sourceRefTitleRequestSeq) return
+        sourceRefVideoSegments.value = {
+          ...sourceRefVideoSegments.value,
+          [id]: video.segments.filter(segment => segment.chunk_id && chunkIDs.has(segment.chunk_id)),
+        }
+      }
     } catch {
       // Keep truncated-ID fallback when the doc was deleted or is inaccessible.
     }
@@ -1413,9 +1491,10 @@ async function hydrateSourceRefTitles(refs: string[]) {
 }
 
 watch(
-  () => selectedPage.value?.source_refs,
-  (refs) => {
-    if (refs?.length) hydrateSourceRefTitles(refs)
+  () => [selectedPage.value?.source_refs, selectedPage.value?.chunk_refs] as const,
+  ([refs, chunks]) => {
+    if (refs?.length) void hydrateSourceRefTitles(refs, chunks || [])
+    else { sourceRefTitleRequestSeq++; sourceRefVideoSegments.value = {} }
   },
   { immediate: true },
 )
@@ -1688,6 +1767,19 @@ async function openGraphDrawer(slug: string) {
     const res = await getWikiPage(props.knowledgeBaseId, slug)
     graphDrawerPage.value = (res as any).data || res as any
     graphDrawerVisible.value = true
+    const page = graphDrawerPage.value
+    if (page?.source_refs?.length) {
+      void Promise.all(page.source_refs.map(async raw => {
+        const id = parseSourceRefEntry(raw).id
+        if (sourceRefTitleCache[id]) return
+        try {
+          const detail = await getKnowledgeDetails(id)
+          const data = (detail as any)?.data ?? detail
+          const title = data?.title || data?.file_name || data?.fileName
+          if (title) sourceRefTitleCache[id] = title
+        } catch { /* The source may have been removed or access revoked. */ }
+      }))
+    }
   } catch (e) {
     console.error(`Failed to load page ${slug}:`, e)
   }
@@ -3488,8 +3580,9 @@ function mergeGraphData(
     if (!existing) {
       nodeBySlug.set(n.slug, n)
       bloomGenerations.set(n.slug, gen)
-    } else if (n.familiar) {
-      existing.familiar = true
+    } else {
+      existing.familiar = existing.familiar || n.familiar
+      existing.video_source_ids = n.video_source_ids
     }
   }
   const edgeKey = (e: { source: string; target: string }) => `${e.source}→${e.target}`
@@ -3830,6 +3923,7 @@ function slugDisplayName(slug: string): string {
 interface GNode {
   x: number; y: number; vx: number; vy: number
   slug: string; title: string; type: string
+  videoSourceIds: string[]
   linkCount: number; pinned: boolean
   familiar: boolean
   labelWidth: number
@@ -4115,6 +4209,7 @@ function renderGraph(opts: RenderGraphOpts = {}) {
     const node: GNode = {
       x: prior?.x ?? placement.x, y: prior?.y ?? placement.y, vx: 0, vy: 0,
       slug: n.slug, title: n.title, type: n.page_type,
+      videoSourceIds: n.video_source_ids || [],
       linkCount: n.link_count || 0, pinned: prior?.pinned ?? false,
       familiar: !!n.familiar,
       labelWidth: Math.min(n.title.length, 15) * 11,
@@ -4224,6 +4319,11 @@ function renderGraph(opts: RenderGraphOpts = {}) {
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
     g.style.cursor = 'pointer'
     g.setAttribute('data-graph-node', n.slug)
+    const isVideoNode = n.type === 'summary' && n.videoSourceIds.length > 0
+    if (isVideoNode) g.setAttribute('data-video-node', 'true')
+    const nodeTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title')
+    nodeTitle.textContent = isVideoNode ? `${t('videoKnowledge.tab')}: ${n.title}` : n.title
+    g.appendChild(nodeTitle)
 
     const r = nodeRadius(n)
 
@@ -4295,6 +4395,17 @@ function renderGraph(opts: RenderGraphOpts = {}) {
     // circle.setAttribute('filter', 'url(#node-shadow)')
     circle.style.transition = 'r 0.2s, stroke-width 0.2s, opacity 0.2s'
     g.appendChild(circle)
+
+    if (isVideoNode) {
+      const play = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+      play.setAttribute('text-anchor', 'middle')
+      play.setAttribute('dominant-baseline', 'central')
+      play.setAttribute('font-size', String(Math.max(12, r)))
+      play.setAttribute('fill', '#fff')
+      play.setAttribute('pointer-events', 'none')
+      play.textContent = '▶'
+      g.appendChild(play)
+    }
 
     // Text label wrapper for better readability
     const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
@@ -6721,6 +6832,13 @@ span.graph-focus-name {
 :deep(.wiki-graph-drawer) {
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.08);
 }
+
+.graph-source-footer { display: block; margin-top: 16px; }
+.graph-source-links { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.graph-source-link { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 32px; padding: 4px 0; border: 0; background: none; color: var(--td-brand-color); text-align: left; cursor: pointer; }
+.graph-source-link span { min-width: 0; overflow-wrap: anywhere; }
+.graph-source-link:hover { text-decoration: underline; }
+.graph-source-link:focus-visible { outline: 2px solid var(--td-brand-color); outline-offset: 2px; }
 
 .graph-search-select {
   background: var(--td-bg-color-container) !important;

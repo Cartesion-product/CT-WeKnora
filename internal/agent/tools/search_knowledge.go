@@ -1092,6 +1092,10 @@ func (t *SearchKnowledgeTool) formatOutput(
 			fmt.Fprintf(&ob, "<match_snippet>%s</match_snippet>\n", xmlEscape(snippet))
 		}
 		fmt.Fprintf(&ob, "<content>%s</content>\n", result.Content)
+		if result.Media != nil {
+			mediaJSON, _ := json.Marshal(result.Media)
+			fmt.Fprintf(&ob, "<media>%s</media>\n", xmlEscape(string(mediaJSON)))
+		}
 		if result.ImageInfo != "" {
 			var imageInfos []types.ImageInfo
 			if err := json.Unmarshal([]byte(result.ImageInfo), &imageInfos); err == nil {
@@ -1122,6 +1126,9 @@ func (t *SearchKnowledgeTool) formatOutput(
 			"source_query":        result.SourceQuery,
 			"query_type":          result.QueryType,
 			"knowledge_base_type": result.KnowledgeBaseType,
+		}
+		if result.Media != nil {
+			row["media"] = result.Media
 		}
 		if images := chunkImageList(result.ImageInfo); len(images) > 0 {
 			row["images"] = images

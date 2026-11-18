@@ -687,7 +687,45 @@ func (s *wikiPageService) GetGraph(ctx context.Context, req *types.WikiGraphRequ
 	if err != nil {
 		return nil, err
 	}
-	return computeGraphSubset(pages, req)
+	graph, err := computeGraphSubset(pages, req)
+	if err != nil {
+		return nil, err
+	}
+	videoSources, ok := s.repo.(interface {
+		ListActiveVideoKnowledgeIDs(context.Context, string) ([]string, error)
+	})
+	if !ok || len(graph.Nodes) == 0 {
+		return graph, nil
+	}
+	videoIDs, err := videoSources.ListActiveVideoKnowledgeIDs(ctx, req.KnowledgeBaseID)
+	if err != nil {
+		logger.Warnf(ctx, "wiki graph video source lookup failed: %v", err)
+		return graph, nil
+	}
+	markGraphVideoSources(graph, pages, videoIDs)
+	return graph, nil
+}
+
+func markGraphVideoSources(graph *types.WikiGraphData, pages []*types.WikiPage, videoIDs []string) {
+	active := make(map[string]bool, len(videoIDs))
+	for _, id := range videoIDs {
+		active[id] = true
+	}
+	pageBySlug := make(map[string]*types.WikiPage, len(pages))
+	for _, page := range pages {
+		pageBySlug[page.Slug] = page
+	}
+	for i := range graph.Nodes {
+		if page := pageBySlug[graph.Nodes[i].Slug]; page != nil {
+			seen := make(map[string]bool)
+			for _, id := range page.SourceKnowledgeIDs() {
+				if active[id] && !seen[id] {
+					graph.Nodes[i].VideoSourceIDs = append(graph.Nodes[i].VideoSourceIDs, id)
+					seen[id] = true
+				}
+			}
+		}
+	}
 }
 
 // computeGraphSubset is the pure I/O-free core of GetGraph. It takes the

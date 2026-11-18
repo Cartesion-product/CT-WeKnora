@@ -45,8 +45,48 @@ func TestOllamaASRTranscribesChunks(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "第1段 第2段", result.Text)
 	require.InDelta(t, 30.0000625, result.Duration, 0.000001)
+	require.Equal(t, []Segment{
+		{Start: 0, End: 30, Text: "第1段"},
+		{Start: 30, End: 30.0000625, Text: "第2段"},
+	}, result.Segments)
 	require.Equal(t, 2, calls)
 	require.Equal(t, "ct-weknora-asr", a.GetModelID())
+}
+
+func TestOllamaASRSkipsSilentWindowButKeepsAbsoluteTime(t *testing.T) {
+	calls := 0
+	a := &ollamaASR{modelName: "frozenlab/qwen3-asr:1.7b",
+		chat: func(_ context.Context, _ *ollamaapi.ChatRequest, fn ollamaapi.ChatResponseFunc) error {
+			calls++
+			text := ""
+			if calls == 2 {
+				text = "第二段"
+			}
+			return fn(ollamaapi.ChatResponse{Message: ollamaapi.Message{Content: "<asr_text>" + text}})
+		},
+	}
+	pcm := bytes.NewReader(bytes.Repeat([]byte{0, 0}, ollamaASRChunkBytes))
+	result, err := a.transcribePCM(context.Background(), pcm, 0, nil)
+	require.NoError(t, err)
+	require.Equal(t, "第二段", result.Text)
+	require.Equal(t, []Segment{{Start: 30, End: 60, Text: "第二段"}}, result.Segments)
+}
+
+func TestOllamaASRWindowCallbackIncludesSilenceAndResumeOffset(t *testing.T) {
+	a := &ollamaASR{modelName: "frozenlab/qwen3-asr:1.7b",
+		chat: func(_ context.Context, _ *ollamaapi.ChatRequest, fn ollamaapi.ChatResponseFunc) error {
+			return fn(ollamaapi.ChatResponse{Message: ollamaapi.Message{Content: "<asr_text>"}})
+		},
+	}
+	var windows []Window
+	result, err := a.transcribePCM(context.Background(), bytes.NewReader([]byte{0, 0}), 3, func(w Window) error {
+		windows = append(windows, w)
+		return nil
+	})
+	require.NoError(t, err)
+	require.Equal(t, []Window{{Index: 3, Start: 90, End: 90.0000625}}, windows)
+	require.Empty(t, result.Segments)
+	require.InDelta(t, 90.0000625, result.Duration, 0.000001)
 }
 
 func TestOllamaASRRejectsUnexpectedResponse(t *testing.T) {

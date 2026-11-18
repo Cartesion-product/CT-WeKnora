@@ -45,6 +45,7 @@ func ResolveProcessConfig(kb *types.KnowledgeBase, overrides *types.KnowledgePro
 		EnableMultimodel:         kb.IsMultimodalEnabled(),
 		VLMConfig:                kb.VLMConfig,
 		ASRConfig:                kb.ASRConfig,
+		VideoConfig:              kb.VideoConfig.Effective(),
 		QuestionGenerationConfig: defaultQuestionGenerationConfig(kb),
 		GraphEnabled:             kb.IsGraphEnabled(),
 		ExtractConfig:            derefExtractConfig(kb.ExtractConfig),
@@ -215,6 +216,9 @@ func ValidateProcessOverrides(
 // Validate the final config, including the legacy enableMultimodel argument
 // applied by upload and reparse callers, before persisting or enqueueing it.
 func validateEffectiveProcessOverrides(eff types.EffectiveProcessConfig, fileTypes []string) error {
+	if err := eff.VideoConfig.Validate(); err != nil {
+		return werrors.NewBadRequestError(err.Error())
+	}
 	hasImage := false
 	hasAudio := false
 	for _, ft := range fileTypes {

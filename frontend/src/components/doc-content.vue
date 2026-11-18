@@ -26,6 +26,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useAssistantStore } from '@/stores/assistant';
 import AssistantActionsButton from '@/components/assistant/AssistantActionsButton.vue';
 import DocumentPreview from '@/components/document-preview.vue';
+import VideoKnowledgeDetail from '@/components/VideoKnowledgeDetail.vue';
 import DocumentFileIcon from '@/views/knowledge/components/DocumentFileIcon.vue';
 import KnowledgeProcessingTimeline from '@/components/knowledge-processing-timeline.vue';
 import { resolveKnowledgeDownloadFileName } from '@/views/knowledge/knowledgeDownloadFileName';
@@ -242,7 +243,7 @@ mermaid.initialize({
     topPadding: 50
   }
 });
-const props = defineProps(["visible", "details", "knowledgeType", "sourceInfo", "canEditKB", "canDownloadKB", "parse_status", "kbId"]);
+const props = defineProps(["visible", "details", "knowledgeType", "sourceInfo", "canEditKB", "canDownloadKB", "parse_status", "kbId", "sourceVideoTarget"]);
 const emit = defineEmits(["closeDoc", "getDoc", "questionDeleted", "summaryStateChange"]);
 const assistant = useAssistantStore();
 const readingAssistantActions = computed(() => {
@@ -554,7 +555,7 @@ const getMarkdownRenderRoot = (): ParentNode | null =>
 let url = ref('')
 // 视图模式：chunks / merged / preview
 // file 类型默认「预览」，URL / 手动创建 默认「全文」
-const viewMode = ref<'chunks' | 'merged' | 'preview'>('merged');
+const viewMode = ref<'chunks' | 'merged' | 'preview' | 'video'>('merged');
 
 // 合并后的文档内容（在下方通过 computed 定义）
 
@@ -752,6 +753,7 @@ const processedChunks = computed(() => {
 });
 
 const canPreview = (): boolean => {
+  if (props.details?.file_type?.toLowerCase() === 'mp4') return false;
   if (props.details?.type !== 'file') return false;
   const ft = resolveFilePreviewExt(props.details?.title, props.details?.file_type);
   if (!ft) return false;
@@ -767,7 +769,9 @@ watch(() => props.details?.id, (newId) => {
     audioBlobUrl.value = '';
   }
   if (!newId) return;
-  if (isAudioFile(props.details?.file_type)) {
+  if (props.details?.file_type?.toLowerCase() === 'mp4') {
+    viewMode.value = 'video';
+  } else if (isAudioFile(props.details?.file_type)) {
     viewMode.value = 'merged'; // 音频默认全文视图，播放器已内嵌
     loadAudioPreview();
   } else if (props.details?.type === 'file' && canPreview()) {
@@ -1838,6 +1842,11 @@ const handleChunkPageChange = (pageInfo: { current: number }) => {
               </span>
             </div>
             <div class="view-mode-buttons">
+              <t-button v-if="details.file_type?.toLowerCase() === 'mp4'" size="small"
+                :variant="viewMode === 'video' ? 'base' : 'outline'"
+                :theme="viewMode === 'video' ? 'primary' : 'default'" @click="viewMode = 'video'" class="view-mode-btn">
+                {{ $t('videoKnowledge.tab') }}
+              </t-button>
               <t-button v-if="canPreview()" size="small" :variant="viewMode === 'preview' ? 'base' : 'outline'"
                 :theme="viewMode === 'preview' ? 'primary' : 'default'" @click="viewMode = 'preview'"
                 class="view-mode-btn">
@@ -1868,7 +1877,10 @@ const handleChunkPageChange = (pageInfo: { current: number }) => {
           </div>
 
           <!-- 合并视图 -->
-          <div v-if="viewMode === 'merged'">
+          <VideoKnowledgeDetail v-if="viewMode === 'video' && details.id" :knowledge-id="details.id" :active="visible"
+            :start-ms="sourceVideoTarget?.startMs" :segment-id="sourceVideoTarget?.segmentId"
+            :processing-run-id="sourceVideoTarget?.processingRunId" />
+          <div v-else-if="viewMode === 'merged'">
             <div v-if="isChunkPageTransition" class="chunk-page-loading">
               <t-loading size="small" />
               <span>{{ $t('common.loading') }}</span>

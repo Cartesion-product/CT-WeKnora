@@ -941,7 +941,7 @@ func validateKnowledgeBaseSettingsUpdate(
 	c *gin.Context, kb *types.KnowledgeBase, cfg *types.KnowledgeBaseConfig, vlm *types.VLMConfig,
 ) error {
 	settings := vlm != nil || cfg != nil && (cfg.EmbeddingModelID != nil || cfg.SummaryModelID != nil ||
-		cfg.StorageBackendID != nil || cfg.ASRConfig != nil ||
+		cfg.StorageBackendID != nil || cfg.ASRConfig != nil || cfg.VideoConfig != nil ||
 		questionModelBindingChanged(kb, cfg.QuestionGenerationConfig))
 	if !settings {
 		return nil
@@ -1008,7 +1008,8 @@ type PatchKnowledgeBaseRequest struct {
 	// Image captions.
 	VLM *types.VLMConfig `json:"vlm_config"`
 	// Speech transcription.
-	ASR *types.ASRConfig `json:"asr_config"`
+	ASR   *types.ASRConfig          `json:"asr_config"`
+	Video *types.VideoProcessConfig `json:"video_config"`
 	// Graph extraction. Node types stay in the knowledge base editor.
 	Extract *types.ExtractConfig `json:"extract_config"`
 	// Generated questions for each chunk.
@@ -1161,6 +1162,14 @@ func applyKnowledgeBasePatch(
 	}
 	if _, ok := sections["asr_config"]; ok && string(sections["asr_config"]) != "null" {
 		cfg.ASRConfig = &asr
+	}
+
+	video := kb.VideoConfig.Effective()
+	if err := merge("video_config", &video); err != nil {
+		return out, err
+	}
+	if _, ok := sections["video_config"]; ok && string(sections["video_config"]) != "null" {
+		cfg.VideoConfig = &video
 	}
 
 	extract := types.ExtractConfig{}

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Tencent/WeKnora/internal/application/access"
@@ -26,6 +27,8 @@ import (
 	secutils "github.com/Tencent/WeKnora/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/hibiken/asynq"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 // KnowledgeHandler processes HTTP requests related to knowledge resources
@@ -41,6 +44,12 @@ type KnowledgeHandler struct {
 	asynqClient       interfaces.TaskEnqueuer
 	spanRepo          repository.KnowledgeSpanRepository
 	backlog           backlogProbe
+	videoRepo         *repository.VideoRepository
+	videoFiles        interfaces.FileService
+	videoStorage      interfaces.StorageBackendResolver
+	videoTenants      interfaces.TenantService
+	videoRedis        *redis.Client
+	videoTokens       sync.Map
 }
 
 // backlogProbe tells a backlogged document (work still queued) from a stuck
@@ -97,6 +106,11 @@ func NewKnowledgeHandler(
 	asynqClient interfaces.TaskEnqueuer,
 	spanRepo repository.KnowledgeSpanRepository,
 	housekeeping *service.HousekeepingService,
+	db *gorm.DB,
+	fileSvc interfaces.FileService,
+	storageResolver interfaces.StorageBackendResolver,
+	tenantSvc interfaces.TenantService,
+	redisClient *redis.Client,
 ) *KnowledgeHandler {
 	var backlog backlogProbe
 	if housekeeping != nil {
@@ -114,6 +128,11 @@ func NewKnowledgeHandler(
 		userSvc:           userSvc,
 		asynqClient:       asynqClient,
 		spanRepo:          spanRepo,
+		videoRepo:         repository.NewVideoRepository(db),
+		videoFiles:        fileSvc,
+		videoStorage:      storageResolver,
+		videoTenants:      tenantSvc,
+		videoRedis:        redisClient,
 	}
 }
 
