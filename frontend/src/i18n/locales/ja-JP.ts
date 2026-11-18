@@ -196,9 +196,9 @@ export default {
   automation: {
     conversationNotice: "この会話は自動化タスクが実行します。手動でメッセージは送信できません。保留中のリクエストは上で対応してください。",
     title: 'オートメーション',
-    description: 'WeKnora アシスタントがあなたに代わって定期的にタスクを実行します。結果と承認待ちの操作を通知します。',
+    description: 'SenseDeep アシスタントがあなたに代わって定期的にタスクを実行します。結果と承認待ちの操作を通知します。',
     add: '新規オートメーション',
-    addHint: 'WeKnora アシスタントに作成を頼むこともできます',
+    addHint: 'SenseDeep アシスタントに作成を頼むこともできます',
     paused: '一時停止中',
     scheduleEnded: '終了',
     scheduleEndedHint: 'この一回限りのスケジュールは終了しました。今すぐ実行するか、実行日時を変更してから再開してください。',
@@ -250,7 +250,7 @@ export default {
       sections: {
         basic: {
           title: '基本情報',
-          desc: 'WeKnora アシスタントがタスクを実行します。他のエージェントに委任する場合は、タスクに委任先と作業内容を記載してください。',
+          desc: 'SenseDeep アシスタントがタスクを実行します。他のエージェントに委任する場合は、タスクに委任先と作業内容を記載してください。',
         },
         schedule: {
           title: '実行スケジュール',
@@ -693,16 +693,16 @@ export default {
     reopen: 'プロダクトツアー',
     steps: {
       assistant: {
-        title: 'WeKnora アシスタントのご紹介',
-        desc: 'WeKnora のバージョン、機能、設定について質問できます。現在のページをもとに、あなたの権限でエージェントの作成、定期タスクの設定、ナレッジの整理も行えます。'
+        title: 'SenseDeep アシスタントのご紹介',
+        desc: 'SenseDeep のバージョン、機能、設定について質問できます。現在のページをもとに、あなたの権限でエージェントの作成、定期タスクの設定、ナレッジの整理も行えます。'
       },
       welcome: {
-        title: 'WeKnoraへようこそ',
+        title: 'SenseDeepへようこそ',
         desc: '数ステップでナレッジベース、チャット、エージェントの使い方をご紹介します。「次へ」をクリックして開始してください。'
       },
       knowledge: {
         title: 'ナレッジベースを作成',
-        desc: 'すべてはここから始まります。ドキュメント、Webページ、FAQをアップロードすると、WeKnoraが自動で解析してインデックスを作成します。ここをクリックしてナレッジベースを開いてください。'
+        desc: 'すべてはここから始まります。ドキュメント、Webページ、FAQをアップロードすると、SenseDeepが自動で解析してインデックスを作成します。ここをクリックしてナレッジベースを開いてください。'
       },
       chat: {
         title: 'AIチャットを開始',
@@ -2826,7 +2826,7 @@ export default {
     title: 'サンドボックスのシークレット',
     host: {
       title: '環境変数',
-      description: 'このコンピューター上のスキルで使う個人用のキーです。WeKnoraのシステム設定やデプロイ設定ではありません。',
+      description: 'このコンピューター上のスキルで使う個人用のキーです。SenseDeepのシステム設定やデプロイ設定ではありません。',
       helpAria: '環境変数について',
       introRuntimeBody: 'スキルがこのコンピューターで動くときに注入されます。対話中にその場で渡すこともできます。保存後は平文を再表示しません。',
       loadFailed: '環境変数を読み込めませんでした。',
@@ -2835,7 +2835,7 @@ export default {
       nameInvalid: 'この名前は使えません。予約名（PATH や WEKNORA_ で始まる名前）は受け付けません。',
       deleteConfirm: '{name} を削除しますか？これ以降、このコンピューターでの実行には含まれません。',
     },
-    description: 'スキルとサンドボックスで使う個人用のキーです。WeKnoraのシステム設定やデプロイ設定ではありません。',
+    description: 'スキルとサンドボックスで使う個人用のキーです。SenseDeepのシステム設定やデプロイ設定ではありません。',
     helpAria: 'サンドボックスのシークレットについて',
     introPersonalTitle: 'あなただけのもの',
     introPersonalBody: 'あなた自身のチャットや実行にのみ注入されます。他のメンバーからは見えず、他のメンバーの値があなたの値を上書きすることもありません。',
@@ -3130,11 +3130,11 @@ export default {
     haveAccount: 'すでにアカウントをお持ちですか？',
     backToLogin: 'ログインに戻る',
     loginHint: 'ログインして続行してください。初めての方は下からアカウントを作成できます。',
-    firstTime: 'WeKnoraは初めてですか？',
+    firstTime: 'SenseDeepは初めてですか？',
     registerSuccess: '登録が完了しました。ログインしてください',
     registerFailed: '登録に失敗しました',
     subtitle: 'RAG質問応答、ReActエージェント、Wiki。LLMが支える企業向けナレッジフレームワーク',
-    registerSubtitle: 'アカウントを作成してWeKnoraを使い始めましょう',
+    registerSubtitle: 'アカウントを作成してSenseDeepを使い始めましょう',
     emailPlaceholder: 'メールアドレスを入力',
     passwordPlaceholder: 'パスワードを入力',
     confirmPasswordPlaceholder: 'パスワードを再入力',
@@ -3493,7 +3493,7 @@ export default {
     }
   },
   createChat: {
-    title: 'こんにちは、WeKnoraです。あなたのナレッジを、すぐそばに',
+    title: 'こんにちは、SenseDeepです。あなたのナレッジを、すぐそばに',
     newSessionTitle: '新しいセッション',
     openProject: 'プロジェクトを選択',
     clearProject: '解除',
@@ -3748,7 +3748,7 @@ export default {
       systemActor: 'システム',
       actorWithAPIKey: '{actor} · API Key · {name}',
       actorAPIKey: 'API Key · {name}',
-      viaAssistant: 'WeKnora アシスタント経由',
+      viaAssistant: 'SenseDeep アシスタント経由',
       knowledgeBase: 'ナレッジベース',
       countItems: '{count}件',
       titleWithCount: '{title}ほか{count}件',
@@ -6649,7 +6649,7 @@ export default {
       videoNotSupported: 'お使いのブラウザは動画再生に対応していません'
     },
     assistant: {
-      title: 'WeKnora アシスタント',
+      title: 'SenseDeep アシスタント',
       newConversation: '新しい会話',
       history: '会話履歴',
       untitledConversation: '無題の会話',
@@ -6663,10 +6663,10 @@ export default {
       },
       welcomeTitle: '何をお手伝いしましょうか？',
       agentWelcomeDesc: 'このエージェントの設定を確認したり、モデルを変更したり、検索可能なナレッジベースを確認できます。',
-      welcomeDesc: 'WeKnora の使い方、ナレッジやドキュメントの整理、エージェント・ツール・自動化の設定をお手伝いします。',
+      welcomeDesc: 'SenseDeep の使い方、ナレッジやドキュメントの整理、エージェント・ツール・自動化の設定をお手伝いします。',
       help: {
         label: 'アシスタントの説明',
-        title: 'WeKnora アシスタントにできること',
+        title: 'SenseDeep アシスタントにできること',
         identity: 'アシスタントはあなた自身として動きます。見たり変更したりできる範囲は、このスペースでのあなたの役割までです。',
         page: '開くと現在のページが付きます。画面の内容を整理したり、エージェントや自動化を設定したり、フォームに記入したりできます。ボタンを押したり保存したりはしません。',
         access: '入力欄の下で権限を切り替えられます。閲覧のみ、変更前に確認、回復できる変更は自動実行。削除は必ず確認が必要で、管理者が定めた上限は超えられません。',
@@ -6882,8 +6882,8 @@ export default {
             q3: 'Is there a ready-made request example?',
           },
           'integration-mcpserver': {
-            description: 'I can explain how to expose WeKnora as an MCP server, and which tools it offers.',
-            q1: 'How do I offer WeKnora as an MCP server?',
+            description: 'I can explain how to expose SenseDeep as an MCP server, and which tools it offers.',
+            q1: 'How do I offer SenseDeep as an MCP server?',
             q2: 'How does an external client connect?',
             q3: 'Which tools does this server expose?',
           },
@@ -6900,8 +6900,8 @@ export default {
             q3: 'Where does text I select in the extension get sent?',
           },
           'integration-claw': {
-            description: 'I can explain how to connect WeKnora to Claw, and which skill to install.',
-            q1: 'How do I connect WeKnora to Claw?',
+            description: 'I can explain how to connect SenseDeep to Claw, and which skill to install.',
+            q1: 'How do I connect SenseDeep to Claw?',
             q2: 'Which skill do I need to install?',
             q3: 'What can I do in Claw after it is connected?',
           },
@@ -7055,7 +7055,7 @@ export default {
       documentSummary: "このドキュメントの重要な結論は何ですか？",
       failedDocuments: 'このナレッジベースで解析に失敗したドキュメントは？',
       recentActivity: "最近アップロードまたは更新されたドキュメントはどれですか？",
-      formats: 'WeKnora はどのドキュメント形式に対応していますか？',
+      formats: 'SenseDeep はどのドキュメント形式に対応していますか？',
       createWiki: 'Wiki ナレッジベースの作り方は？',
       agents: "これらのエージェントはそれぞれどんな質問に向いていますか？",
       messageSources: 'この回答の根拠は何ですか？',
@@ -7067,7 +7067,7 @@ export default {
       modelSetup: 'ほかにどのモデルを設定する必要がありますか？',
       mcpSetup: 'MCP サービスを接続するには？',
       releaseHighlights: "現在のバージョンでは主に何が変わりましたか？",
-      gettingStarted: "WeKnora を初めて使う場合、何から設定すればよいですか？",
+      gettingStarted: "SenseDeep を初めて使う場合、何から設定すればよいですか？",
       workflow: "ナレッジベース、エージェント、自動化はどう組み合わせて使えますか？",
       knowledgeOverview: "それぞれのナレッジベースでどんな情報を探せますか？",
       knowledgeType: "ドキュメント、FAQ、Wiki はどう使い分ければよいですか？",
@@ -9026,7 +9026,7 @@ export default {
     },
     chrome: {
       title: 'ナレッジアシスタント',
-      subtitle: 'セルフホスト版WeKnora向け: ブラウジング中にサイドバーで質問したり、Webページをクリップしたり、Markdownメモをナレッジベースに保存したりできます。',
+      subtitle: 'セルフホスト版SenseDeep向け: ブラウジング中にサイドバーで質問したり、Webページをクリップしたり、Markdownメモをナレッジベースに保存したりできます。',
       capabilitiesTitle: '主な機能',
       capabilities: {
         qa: {
@@ -9060,7 +9060,7 @@ export default {
         },
         port: {
           title: 'デスクトップ版: 固定ポートの設定（推奨）',
-          desc: 'WeKnoraデスクトップ版では、API情報で固定ポート（例: 37841）を設定すると、再起動してもURLが変わりません。'
+          desc: 'SenseDeepデスクトップ版では、API情報で固定ポート（例: 37841）を設定すると、再起動してもURLが変わりません。'
         },
         install: {
           title: '拡張機能をインストール',
@@ -9080,7 +9080,7 @@ export default {
     },
     claw: {
       title: 'WeKnora Skill',
-      subtitle: 'WeKnora REST API経由でドキュメントをインポートし、ハイブリッド検索（ベクトル＋キーワード）を実行します。ファイルのアップロード、URLインポート、Markdownでの登録、ナレッジベース横断検索に対応します。',
+      subtitle: 'SenseDeep REST API経由でドキュメントをインポートし、ハイブリッド検索（ベクトル＋キーワード）を実行します。ファイルのアップロード、URLインポート、Markdownでの登録、ナレッジベース横断検索に対応します。',
       capabilitiesTitle: 'スキルの機能',
       capabilities: {
         upload: {

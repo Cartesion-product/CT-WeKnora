@@ -3,6 +3,7 @@ import { resolve, dirname } from 'node:path'
 import { existsSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { copyPdfJsWasm } from './scripts/copy-pdfjs-wasm.mjs'
+import { abyssalBackground } from './scripts/abyssal-background.mjs'
 import { createRequire } from 'node:module'
 import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -139,6 +140,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    abyssalBackground(),
     vue(),
     vueJsx(),
     embedHtmlDevFallback(),

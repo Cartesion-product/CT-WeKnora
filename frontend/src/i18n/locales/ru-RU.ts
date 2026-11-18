@@ -196,9 +196,9 @@ export default {
   automation: {
     conversationNotice: "Этот диалог выполняется автоматизацией. Отправка сообщений вручную недоступна. Обработайте ожидающие запросы выше.",
     title: 'Автоматизации',
-    description: 'Помощник WeKnora выполняет задачи по расписанию от вашего имени. О результатах и ожидающих подтверждениях вы получите уведомление.',
+    description: 'Помощник SenseDeep выполняет задачи по расписанию от вашего имени. О результатах и ожидающих подтверждениях вы получите уведомление.',
     add: 'Новая автоматизация',
-    addHint: 'Или попросите ассистента WeKnora создать её',
+    addHint: 'Или попросите ассистента SenseDeep создать её',
     paused: 'Приостановлена',
     scheduleEnded: 'Завершено',
     scheduleEndedHint: 'Время однократного запуска прошло. Запустите сейчас или измените время перед возобновлением.',
@@ -250,7 +250,7 @@ export default {
       sections: {
         basic: {
           title: 'Основное',
-          desc: 'Задачи выполняет помощник WeKnora. Для делегирования укажите в задаче агентов и порученную им работу.',
+          desc: 'Задачи выполняет помощник SenseDeep. Для делегирования укажите в задаче агентов и порученную им работу.',
         },
         schedule: {
           title: 'Расписание',
@@ -849,7 +849,7 @@ export default {
     filterAllAgents: 'Все агенты',
     claw: {
       title: 'WeKnora Skill',
-      subtitle: 'Импорт документов и гибридный поиск (вектор + ключевые слова) через REST API WeKnora — загрузки, URL, Markdown и поиск.',
+      subtitle: 'Импорт документов и гибридный поиск (вектор + ключевые слова) через REST API SenseDeep — загрузки, URL, Markdown и поиск.',
       capabilitiesTitle: 'Возможности Skill',
       stepsTitle: 'Шаги настройки',
       openApiSettings: 'Открыть API-информацию',
@@ -903,7 +903,7 @@ export default {
     },
     chrome: {
       title: 'Помощник по знаниям',
-      subtitle: 'Для self-hosted WeKnora: вопросы в боковой панели, клиппинг страниц и Markdown-заметки в базы знаний прямо при просмотре.',
+      subtitle: 'Для self-hosted SenseDeep: вопросы в боковой панели, клиппинг страниц и Markdown-заметки в базы знаний прямо при просмотре.',
       capabilitiesTitle: 'Возможности',
       stepsTitle: 'Шаги настройки',
       openApiSettings: 'Открыть API-информацию',
@@ -2767,7 +2767,7 @@ export default {
     askUser: 'Вопрос пользователю'
   },
   assistant: {
-    title: 'Ассистент WeKnora',
+    title: 'Ассистент SenseDeep',
     newConversation: 'Новый диалог',
     history: 'История диалогов',
     untitledConversation: 'Диалог без названия',
@@ -2781,10 +2781,10 @@ export default {
     },
     welcomeTitle: 'Чем помочь?',
     agentWelcomeDesc: 'Проверьте настройки этого агента, смените модель или узнайте, в каких базах знаний он может искать.',
-    welcomeDesc: 'Помогу разобраться в WeKnora, упорядочить знания и документы, настроить агентов, инструменты и автоматизации.',
+    welcomeDesc: 'Помогу разобраться в SenseDeep, упорядочить знания и документы, настроить агентов, инструменты и автоматизации.',
     help: {
       label: 'О помощнике',
-      title: 'Что умеет помощник WeKnora',
+      title: 'Что умеет помощник SenseDeep',
       identity: 'Помощник действует от вашего имени. Он видит и меняет только то, что позволяет ваша роль в этом пространстве.',
       page: 'Открываясь, он берёт текущую страницу: может разобрать её содержимое, настроить агентов и автоматизации или заполнить формы. Кнопки он не нажимает и сам не сохраняет.',
       access: 'Под полем ввода можно сменить доступ: только чтение, подтверждение перед изменениями или автоматическое выполнение обратимых правок. Удаление всегда требует подтверждения, а потолок, заданный администратором, превысить нельзя.',
@@ -3000,8 +3000,8 @@ export default {
           q3: 'Is there a ready-made request example?',
         },
         'integration-mcpserver': {
-          description: 'I can explain how to expose WeKnora as an MCP server, and which tools it offers.',
-          q1: 'How do I offer WeKnora as an MCP server?',
+          description: 'I can explain how to expose SenseDeep as an MCP server, and which tools it offers.',
+          q1: 'How do I offer SenseDeep as an MCP server?',
           q2: 'How does an external client connect?',
           q3: 'Which tools does this server expose?',
         },
@@ -3018,8 +3018,8 @@ export default {
           q3: 'Where does text I select in the extension get sent?',
         },
         'integration-claw': {
-          description: 'I can explain how to connect WeKnora to Claw, and which skill to install.',
-          q1: 'How do I connect WeKnora to Claw?',
+          description: 'I can explain how to connect SenseDeep to Claw, and which skill to install.',
+          q1: 'How do I connect SenseDeep to Claw?',
           q2: 'Which skill do I need to install?',
           q3: 'What can I do in Claw after it is connected?',
         },
@@ -3173,7 +3173,7 @@ export default {
       documentSummary: "Каковы ключевые выводы этого документа?",
       failedDocuments: 'Какие документы этой базы знаний не удалось разобрать?',
       recentActivity: "Какие документы недавно загрузили или обновили?",
-      formats: 'Какие форматы документов поддерживает WeKnora?',
+      formats: 'Какие форматы документов поддерживает SenseDeep?',
       createWiki: 'Как создать базу знаний Wiki?',
       agents: "Для каких вопросов подходит каждый из этих агентов?",
       messageSources: 'На чём основан этот ответ?',
@@ -3185,7 +3185,7 @@ export default {
       modelSetup: 'Какие модели мне ещё нужно настроить?',
       mcpSetup: 'Как подключить MCP-сервис?',
       releaseHighlights: "Что изменилось в текущей версии?",
-      gettingStarted: "Что нужно настроить в WeKnora в первую очередь?",
+      gettingStarted: "Что нужно настроить в SenseDeep в первую очередь?",
       workflow: "Как использовать вместе базы знаний, агентов и автоматизации?",
       knowledgeOverview: "Какую информацию можно найти в каждой из этих баз знаний?",
       knowledgeType: "Когда лучше использовать документы, FAQ или Wiki?",
@@ -6126,7 +6126,7 @@ export default {
       systemActor: 'Система',
       actorWithAPIKey: '{actor} · API Key · {name}',
       actorAPIKey: 'API Key · {name}',
-      viaAssistant: 'Через ассистента WeKnora',
+      viaAssistant: 'Через ассистента SenseDeep',
       knowledgeBase: 'База знаний',
       countItems: '{count} элем.',
       titleWithCount: '{title} и ещё {count}',
@@ -6451,7 +6451,7 @@ export default {
     }
   },
   createChat: {
-    title: 'Привет, я WeKnora — ваши знания всегда под рукой',
+    title: 'Привет, я SenseDeep — ваши знания всегда под рукой',
     newSessionTitle: 'Новая сессия',
     openProject: 'Выбрать проект',
     clearProject: 'Снять привязку',
@@ -6801,11 +6801,11 @@ export default {
     haveAccount: 'Уже есть аккаунт?',
     backToLogin: 'Вернуться ко входу',
     loginHint: 'Войдите, чтобы продолжить, или создайте аккаунт ниже, если вы впервые здесь.',
-    firstTime: 'Впервые в WeKnora?',
+    firstTime: 'Впервые в SenseDeep?',
     registerSuccess: 'Регистрация завершена. Войдите в систему',
     registerFailed: 'Ошибка регистрации',
     subtitle: 'RAG, ReAct-агент и Wiki — корпоративный фреймворк знаний на основе больших моделей',
-    registerSubtitle: 'Создайте аккаунт и начните работу с WeKnora',
+    registerSubtitle: 'Создайте аккаунт и начните работу с SenseDeep',
     emailPlaceholder: 'Введите адрес электронной почты',
     passwordPlaceholder: 'Введите пароль',
     confirmPasswordPlaceholder: 'Введите пароль ещё раз',
@@ -7122,7 +7122,7 @@ export default {
     title: 'Ключи песочницы',
     host: {
       title: 'Переменные среды',
-      description: 'Личные ключи для навыков на этом компьютере, а не системные или деплой-настройки WeKnora.',
+      description: 'Личные ключи для навыков на этом компьютере, а не системные или деплой-настройки SenseDeep.',
       helpAria: 'Справка по переменным среды',
       introRuntimeBody: 'Подставляются, когда навык выполняется на этом компьютере. Значение можно передать и прямо в диалоге. После сохранения открытый текст больше не показывается.',
       loadFailed: 'Не удалось загрузить переменные среды.',
@@ -7131,7 +7131,7 @@ export default {
       nameInvalid: 'Это имя нельзя использовать. Зарезервированные имена (например PATH или начинающиеся с WEKNORA_) отклоняются.',
       deleteConfirm: 'Удалить {name}? Дальнейшие запуски на этом компьютере больше не будут его получать.',
     },
-    description: 'Личные ключи для навыков и песочниц, а не системные или деплой-настройки WeKnora.',
+    description: 'Личные ключи для навыков и песочниц, а не системные или деплой-настройки SenseDeep.',
     helpAria: 'Справка по ключам песочницы',
     introPersonalTitle: 'Только ваши',
     introPersonalBody: 'Подставляются только в ваши диалоги и запуски. Другие участники их не видят, и их значения не заменяют ваши.',
@@ -9241,8 +9241,8 @@ export default {
     reopen: 'Обучение',
     steps: {
       assistant: {
-        title: 'Знакомьтесь: помощник WeKnora',
-        desc: 'Задавайте вопросы о версиях, функциях и настройке WeKnora. Учитывая текущую страницу, помощник может создавать агентов, планировать задачи и упорядочивать знания от вашего имени, в пределах ваших прав.'
+        title: 'Знакомьтесь: помощник SenseDeep',
+        desc: 'Задавайте вопросы о версиях, функциях и настройке SenseDeep. Учитывая текущую страницу, помощник может создавать агентов, планировать задачи и упорядочивать знания от вашего имени, в пределах ваших прав.'
       },
       done: {
         title: 'Всё готово',
@@ -9266,10 +9266,10 @@ export default {
       },
       knowledge: {
         title: 'Создайте базу знаний',
-        desc: 'С этого всё начинается: загружайте документы, веб-страницы или FAQ, и WeKnora автоматически разберёт и проиндексирует их. Нажмите здесь, чтобы открыть базы знаний.'
+        desc: 'С этого всё начинается: загружайте документы, веб-страницы или FAQ, и SenseDeep автоматически разберёт и проиндексирует их. Нажмите здесь, чтобы открыть базы знаний.'
       },
       welcome: {
-        title: 'Добро пожаловать в WeKnora',
+        title: 'Добро пожаловать в SenseDeep',
         desc: 'Несколько простых шагов познакомят вас с базами знаний, чатом и агентами. Нажмите «Далее», чтобы начать.'
       }
     }

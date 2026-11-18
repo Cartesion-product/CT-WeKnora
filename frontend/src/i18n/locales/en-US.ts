@@ -196,9 +196,9 @@ export default {
   automation: {
     conversationNotice: "This conversation is run by an automation. Manual messages are unavailable; handle pending requests above.",
     title: 'Automations',
-    description: 'Have the WeKnora assistant run tasks on a schedule as you. You are notified of results and pending approvals.',
+    description: 'Have the SenseDeep assistant run tasks on a schedule as you. You are notified of results and pending approvals.',
     add: 'New automation',
-    addHint: 'Or ask the WeKnora assistant to set one up',
+    addHint: 'Or ask the SenseDeep assistant to set one up',
     paused: 'Paused',
     scheduleEnded: 'Ended',
     scheduleEndedHint: 'This one-time schedule has ended. Run it now, or edit the run time before resuming.',
@@ -250,7 +250,7 @@ export default {
       sections: {
         basic: {
           title: 'Basics',
-          desc: 'The WeKnora assistant runs each task. To delegate work, name the agents and their assignments in the task.',
+          desc: 'The SenseDeep assistant runs each task. To delegate work, name the agents and their assignments in the task.',
         },
         schedule: {
           title: 'Schedule',
@@ -693,16 +693,16 @@ export default {
     reopen: 'Product tour',
     steps: {
       assistant: {
-        title: 'Meet the WeKnora Assistant',
-        desc: 'Ask about WeKnora versions, features and setup. Using the current page as context, the assistant can create agents, schedule tasks and organize knowledge on your behalf, within your permissions.'
+        title: 'Meet the SenseDeep Assistant',
+        desc: 'Ask about SenseDeep versions, features and setup. Using the current page as context, the assistant can create agents, schedule tasks and organize knowledge on your behalf, within your permissions.'
       },
       welcome: {
-        title: 'Welcome to WeKnora',
+        title: 'Welcome to SenseDeep',
         desc: 'A few quick steps to get you familiar with knowledge bases, chat and agents. Click "Next" to begin.'
       },
       knowledge: {
         title: 'Create your knowledge base',
-        desc: 'Everything starts here: upload documents, web pages or FAQs and WeKnora parses and indexes them automatically. Click here to open knowledge bases.'
+        desc: 'Everything starts here: upload documents, web pages or FAQs and SenseDeep parses and indexes them automatically. Click here to open knowledge bases.'
       },
       chat: {
         title: 'Start an AI chat',
@@ -2826,7 +2826,7 @@ export default {
     title: 'Sandbox secrets',
     host: {
       title: 'Environment variables',
-      description: 'Personal keys for skills on this computer, not WeKnora system or deployment settings.',
+      description: 'Personal keys for skills on this computer, not SenseDeep system or deployment settings.',
       helpAria: 'About environment variables',
       introRuntimeBody: 'Injected when a skill runs on this computer. You can also provide a value in chat. Saved values are not shown again.',
       loadFailed: 'Could not load environment variables.',
@@ -2835,7 +2835,7 @@ export default {
       nameInvalid: 'This name cannot be used. Reserved names (for example PATH, or names starting with WEKNORA_) are rejected.',
       deleteConfirm: 'Delete {name}? Later runs on this computer will no longer include it.',
     },
-    description: 'Personal keys for skills and sandboxes, not WeKnora system or deployment settings.',
+    description: 'Personal keys for skills and sandboxes, not SenseDeep system or deployment settings.',
     helpAria: 'About sandbox secrets',
     introPersonalTitle: 'Yours only',
     introPersonalBody: 'Injected into your own chats and runs. Other members cannot see them, and theirs will not replace yours.',
@@ -3130,11 +3130,11 @@ export default {
     haveAccount: 'Already have an account?',
     backToLogin: 'Back to Login',
     loginHint: 'Sign in to continue, or create an account below if this is your first time.',
-    firstTime: 'New to WeKnora?',
+    firstTime: 'New to SenseDeep?',
     registerSuccess: 'Registration successful. Please sign in',
     registerFailed: 'Registration failed',
-    subtitle: 'RAG Q&A, ReAct Agent and Wiki — an LLM-powered enterprise knowledge framework',
-    registerSubtitle: 'Create your account and start using WeKnora',
+    subtitle: 'Sign in to manage and search your team knowledge',
+    registerSubtitle: 'Create your account and start using SenseDeep',
     emailPlaceholder: 'Enter email address',
     passwordPlaceholder: 'Enter password',
     confirmPasswordPlaceholder: 'Enter password again',
@@ -3493,7 +3493,7 @@ export default {
     }
   },
   createChat: {
-    title: 'Hi, I am WeKnora — your knowledge, within reach',
+    title: 'Ask your knowledge base',
     newSessionTitle: 'New Session',
     openProject: 'Select project',
     clearProject: 'Clear',
@@ -3748,7 +3748,7 @@ export default {
       systemActor: 'System',
       actorWithAPIKey: '{actor} · API Key · {name}',
       actorAPIKey: 'API Key · {name}',
-      viaAssistant: 'Via WeKnora Assistant',
+      viaAssistant: 'Via SenseDeep Assistant',
       knowledgeBase: 'Knowledge base',
       countItems: '{count} items',
       titleWithCount: '{title} and {count} more',
@@ -6649,7 +6649,7 @@ export default {
       videoNotSupported: 'Your browser does not support video playback'
     },
     assistant: {
-      title: 'WeKnora Assistant',
+      title: 'SenseDeep Assistant',
       newConversation: 'New conversation',
       history: 'Conversation history',
       untitledConversation: 'Untitled conversation',
@@ -6663,10 +6663,10 @@ export default {
       },
       welcomeTitle: 'How can I help?',
       agentWelcomeDesc: 'Check this agent’s configuration, change its model or see which knowledge bases it can search.',
-      welcomeDesc: 'I can answer questions about WeKnora, organize knowledge and documents, and help set up agents, tools and automations.',
+      welcomeDesc: 'I can answer questions about SenseDeep, organize knowledge and documents, and help set up agents, tools and automations.',
       help: {
         label: 'About the assistant',
-        title: 'What the WeKnora assistant can do',
+        title: 'What the SenseDeep assistant can do',
         identity: 'The assistant works as you. It can see and change only what your role in this workspace allows.',
         page: 'It keeps the current page attached, so it can summarize what is on screen, set up agents and automations, or fill in forms. It will not click buttons or save for you.',
         access: 'Under the input you can switch access: read-only, confirm before changes, or run recoverable changes automatically. Deletes always need your confirmation, and an admin ceiling cannot be exceeded.',
@@ -6882,8 +6882,8 @@ export default {
           q3: 'Is there a ready-made request example?',
         },
         'integration-mcpserver': {
-          description: 'I can explain how to expose WeKnora as an MCP server, and which tools it offers.',
-          q1: 'How do I offer WeKnora as an MCP server?',
+          description: 'I can explain how to expose SenseDeep as an MCP server, and which tools it offers.',
+          q1: 'How do I offer SenseDeep as an MCP server?',
           q2: 'How does an external client connect?',
           q3: 'Which tools does this server expose?',
         },
@@ -6900,8 +6900,8 @@ export default {
           q3: 'Where does text I select in the extension get sent?',
         },
         'integration-claw': {
-          description: 'I can explain how to connect WeKnora to Claw, and which skill to install.',
-          q1: 'How do I connect WeKnora to Claw?',
+          description: 'I can explain how to connect SenseDeep to Claw, and which skill to install.',
+          q1: 'How do I connect SenseDeep to Claw?',
           q2: 'Which skill do I need to install?',
           q3: 'What can I do in Claw after it is connected?',
         },
@@ -7055,7 +7055,7 @@ export default {
       documentSummary: "What are this document’s key conclusions?",
       failedDocuments: 'Which documents in this knowledge base failed to parse?',
       recentActivity: "Which documents were uploaded or updated recently?",
-      formats: 'Which document formats does WeKnora support?',
+      formats: 'Which document formats does SenseDeep support?',
       createWiki: 'How do I create a Wiki knowledge base?',
       agents: "What kinds of questions is each of these agents good at?",
       messageSources: 'What is this answer based on?',
@@ -7067,7 +7067,7 @@ export default {
       modelSetup: 'Which models do I still need to set up?',
       mcpSetup: 'How do I connect an MCP service?',
       releaseHighlights: "What are the main changes in the current version?",
-      gettingStarted: "What should I set up first in WeKnora?",
+      gettingStarted: "What should I set up first in SenseDeep?",
       workflow: "How do knowledge bases, agents and automations work together?",
       knowledgeOverview: "What can I find in each of these knowledge bases?",
       knowledgeType: "When should I use documents, FAQ or Wiki?",
@@ -9026,7 +9026,7 @@ export default {
     },
     chrome: {
       title: 'Knowledge Assistant',
-      subtitle: 'For self-hosted WeKnora: ask questions in a sidebar, clip web pages, and save Markdown notes into your knowledge bases while you browse.',
+      subtitle: 'For self-hosted SenseDeep: ask questions in a sidebar, clip web pages, and save Markdown notes into your knowledge bases while you browse.',
       capabilitiesTitle: 'Core capabilities',
       capabilities: {
         qa: {
@@ -9080,7 +9080,7 @@ export default {
     },
     claw: {
       title: 'WeKnora Skill',
-      subtitle: 'Import documents and run hybrid retrieval (vector + keyword) via the WeKnora REST API—for uploads, URL imports, Markdown entries, and cross-KB search.',
+      subtitle: 'Import documents and run hybrid retrieval (vector + keyword) via the SenseDeep REST API—for uploads, URL imports, Markdown entries, and cross-KB search.',
       capabilitiesTitle: 'Skill capabilities',
       capabilities: {
         upload: {

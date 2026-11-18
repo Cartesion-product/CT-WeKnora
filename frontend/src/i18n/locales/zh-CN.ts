@@ -196,9 +196,9 @@ export default {
   automation: {
     conversationNotice: "此会话由自动化任务运行，不能手动发送消息。请在上方处理待审批事项。",
     title: '自动化',
-    description: '让 WeKnora 助手按计划以你的身份执行任务，结果和待审批事项会通知你。',
+    description: '让识渊助手按计划以你的身份执行任务，结果和待审批事项会通知你。',
     add: '新建自动化',
-    addHint: '也可以直接让 WeKnora 助手帮你创建',
+    addHint: '也可以直接让识渊助手帮你创建',
     paused: '已暂停',
     scheduleEnded: '已结束',
     scheduleEndedHint: '一次性计划已结束。可立即运行，或修改运行时间后恢复。',
@@ -250,7 +250,7 @@ export default {
       sections: {
         basic: {
           title: '基本信息',
-          desc: '任务由 WeKnora 助手执行。需要其他智能体时，请在任务中写明委派对象和工作。',
+          desc: '任务由识渊助手执行。需要其他智能体时，请在任务中写明委派对象和工作。',
         },
         schedule: {
           title: '运行时间',
@@ -849,7 +849,7 @@ export default {
     filterAllAgents: '全部智能体',
     claw: {
       title: 'WeKnora Skill',
-      subtitle: '通过 WeKnora REST API 导入文档并执行混合检索（向量 + 关键词）。适用于上传文件/URL/Markdown 到知识库、跨库检索与浏览知识内容。',
+      subtitle: '通过识渊 REST API 导入文档并执行混合检索（向量 + 关键词）。适用于上传文件/URL/Markdown 到知识库、跨库检索与浏览知识内容。',
       capabilitiesTitle: 'Skill 能力',
       stepsTitle: '配置步骤',
       openApiSettings: '打开 API 信息',
@@ -903,7 +903,7 @@ export default {
     },
     chrome: {
       title: '知识管理助手',
-      subtitle: '配合 WeKnora 自建服务使用：在任意网页侧边栏提问、剪藏内容、Markdown 速记，将浏览中的知识沉淀到你的知识库。',
+      subtitle: '配合识渊自建服务使用：在任意网页侧边栏提问、剪藏内容、Markdown 速记，将浏览中的知识沉淀到你的知识库。',
       capabilitiesTitle: '核心能力',
       stepsTitle: '配置步骤',
       openApiSettings: '打开 API 信息',
@@ -923,7 +923,7 @@ export default {
         },
         port: {
           title: '桌面版配置固定端口（推荐）',
-          desc: '使用 WeKnora 桌面版时，在 API 信息中设置固定端口（如 37841），避免每次启动后地址变化导致插件断连。'
+          desc: '使用识渊桌面版时，在 API 信息中设置固定端口（如 37841），避免每次启动后地址变化导致插件断连。'
         },
         api: {
           title: '获取 API 凭证',
@@ -2769,7 +2769,7 @@ export default {
     askUser: '向用户提问'
   },
   assistant: {
-    title: 'WeKnora 助手',
+    title: '识渊助手',
     newConversation: '新对话',
     history: '历史对话',
     untitledConversation: '未命名对话',
@@ -2783,10 +2783,10 @@ export default {
     },
     welcomeTitle: '有什么可以帮你？',
     agentWelcomeDesc: '可以检查这个智能体的配置、调整模型或查看它能检索的知识库。',
-    welcomeDesc: '我可以解答 WeKnora 的使用问题，整理知识与文档，帮你配置智能体、工具和自动化。',
+    welcomeDesc: '我可以解答识渊的使用问题，整理知识与文档，帮你配置智能体、工具和自动化。',
     help: {
       label: '助手说明',
-      title: 'WeKnora 助手能做什么',
+      title: '识渊助手能做什么',
       identity: '助手以你的身份工作。它能看到和修改的范围，与你在这个空间里的角色一致，不会超出你的权限。',
       page: '打开后会附带当前页面，可以据此梳理内容、配置智能体和自动化，或代为填写表单。它不会替你点击按钮或保存。',
       access: '输入框下方可以切换权限：只读、修改前确认、自动执行。删除始终需要你确认。管理员限制的最高等级无法突破。',
@@ -3002,8 +3002,8 @@ export default {
         q3: '有没有现成的请求示例？',
       },
       'integration-mcpserver': {
-        description: '我可以说明怎样把 WeKnora 作为 MCP 服务提供出去，以及会暴露哪些工具。',
-        q1: '怎样把 WeKnora 作为 MCP 服务提供出去？',
+        description: '我可以说明怎样把识渊作为 MCP 服务提供出去，以及会暴露哪些工具。',
+        q1: '怎样把识渊作为 MCP 服务提供出去？',
         q2: '外部客户端要怎样连接？',
         q3: '这个服务会暴露哪些工具？',
       },
@@ -3020,8 +3020,8 @@ export default {
         q3: '扩展里选中的内容会发到哪里？',
       },
       'integration-claw': {
-        description: '我可以说明怎样把 WeKnora 接到 Claw，以及需要安装哪个技能。',
-        q1: '怎样把 WeKnora 接到 Claw？',
+        description: '我可以说明怎样把识渊接到 Claw，以及需要安装哪个技能。',
+        q1: '怎样把识渊接到 Claw？',
         q2: '需要安装哪个技能？',
         q3: '连上之后能在 Claw 里做什么？',
       },
@@ -3175,7 +3175,7 @@ export default {
       documentSummary: "这篇文档有哪些关键结论？",
       failedDocuments: '这个知识库有哪些解析失败的文档？',
       recentActivity: "最近上传或更新了哪些文档？",
-      formats: 'WeKnora 支持哪些文档格式？',
+      formats: '识渊支持哪些文档格式？',
       createWiki: '怎样创建 Wiki 知识库？',
       agents: "这些智能体分别适合回答什么问题？",
       messageSources: '这个回答的依据是什么？',
@@ -3187,7 +3187,7 @@ export default {
       modelSetup: '我还需要配置哪些模型？',
       mcpSetup: '怎样接入一个 MCP 服务？',
       releaseHighlights: "当前版本主要更新了哪些内容？",
-      gettingStarted: "第一次使用 WeKnora，应该先配置什么？",
+      gettingStarted: "第一次使用识渊，应该先配置什么？",
       workflow: "知识库、智能体和自动化该怎么配合使用？",
       knowledgeOverview: "这些知识库分别适合查哪些内容？",
       knowledgeType: "文档、FAQ 和 Wiki，我该怎么选？",
@@ -6127,7 +6127,7 @@ export default {
       systemActor: '系统触发',
       actorWithAPIKey: '{actor} · API Key · {name}',
       actorAPIKey: 'API Key · {name}',
-      viaAssistant: '经 WeKnora 助手',
+      viaAssistant: '经识渊助手',
       knowledgeBase: '知识库',
       countItems: '共 {count} 项',
       titleWithCount: '{title} 等 {count} 项',
@@ -6452,7 +6452,7 @@ export default {
     }
   },
   createChat: {
-    title: 'Hi，我是 WeKnora，让你的知识触手可及',
+    title: '从知识库开始提问',
     newSessionTitle: '新会话',
     openProject: '选择项目',
     clearProject: '取消绑定',
@@ -6802,11 +6802,11 @@ export default {
     haveAccount: '已有账户？',
     backToLogin: '返回登录',
     loginHint: '登录以继续使用；首次使用请在下方创建账户。',
-    firstTime: '首次使用 WeKnora？',
+    firstTime: '首次使用识渊？',
     registerSuccess: '注册成功，请登录',
     registerFailed: '注册失败',
-    subtitle: 'RAG 问答、ReAct 智能体与 Wiki 知识库，大模型驱动的企业级知识框架',
-    registerSubtitle: '创建账户并开始使用 WeKnora',
+    subtitle: '登录识渊，管理和检索团队知识',
+    registerSubtitle: '创建账户并开始使用识渊',
     emailPlaceholder: '输入邮箱地址',
     passwordPlaceholder: '输入密码',
     confirmPasswordPlaceholder: '再次输入密码',
@@ -7123,7 +7123,7 @@ export default {
     title: '沙箱密钥',
     host: {
       title: '环境变量',
-      description: '给本机技能用的个人密钥，不是 WeKnora 的系统或部署配置。',
+      description: '给本机技能用的个人密钥，不是识渊的系统或部署配置。',
       helpAria: '环境变量说明',
       introRuntimeBody: '技能在这台电脑上运行时才会注入；对话里也可以当场提供。保存后不再显示明文。',
       loadFailed: '环境变量加载失败。',
@@ -7132,7 +7132,7 @@ export default {
       nameInvalid: '这个名字不能用。保留名（例如 PATH，或以 WEKNORA_ 开头的名字）不接受。',
       deleteConfirm: '删除 {name}？之后在这台电脑上运行的东西都不会再带上它。',
     },
-    description: '给技能和沙箱用的个人密钥，不是 WeKnora 的系统或部署配置。',
+    description: '给技能和沙箱用的个人密钥，不是识渊的系统或部署配置。',
     helpAria: '沙箱密钥说明',
     introPersonalTitle: '只属于你',
     introPersonalBody: '只注入到你自己的对话和执行里，空间里的其他人看不到，也不会改成他们的值。',
@@ -9242,8 +9242,8 @@ export default {
     reopen: '新手引导',
     steps: {
       assistant: {
-        title: '认识 WeKnora 助手',
-        desc: '可以问 WeKnora 的版本、功能和配置，也可以结合当前页面，以你的身份创建智能体、设置定时任务或整理知识。'
+        title: '认识识渊助手',
+        desc: '可以问识渊的版本、功能和配置，也可以结合当前页面，以你的身份创建智能体、设置定时任务或整理知识。'
       },
       done: {
         title: '一切就绪',
@@ -9267,10 +9267,10 @@ export default {
       },
       knowledge: {
         title: '创建你的知识库',
-        desc: '知识库是一切的起点：上传文档、网页或 FAQ，WeKnora 会自动解析并建立索引。点击这里进入知识库。'
+        desc: '知识库是一切的起点：上传文档、网页或 FAQ，识渊会自动解析并建立索引。点击这里进入知识库。'
       },
       welcome: {
-        title: '欢迎使用 WeKnora',
+        title: '欢迎使用识渊',
         desc: '只需几步，带你快速了解知识库、对话与智能体的核心用法。点击「下一步」开始。'
       }
     }

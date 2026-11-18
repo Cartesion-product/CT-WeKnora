@@ -196,9 +196,9 @@ export default {
   automation: {
     conversationNotice: "자동화 작업이 실행하는 대화입니다. 메시지를 직접 보낼 수 없습니다. 대기 중인 요청은 위에서 처리하세요.",
     title: '자동화',
-    description: 'WeKnora 도우미가 예약된 시간에 사용자를 대신해 작업을 실행합니다. 결과와 승인 대기 항목을 알려드립니다.',
+    description: 'SenseDeep 도우미가 예약된 시간에 사용자를 대신해 작업을 실행합니다. 결과와 승인 대기 항목을 알려드립니다.',
     add: '새 자동화',
-    addHint: 'WeKnora 어시스턴트에게 만들어 달라고 할 수도 있습니다',
+    addHint: 'SenseDeep 어시스턴트에게 만들어 달라고 할 수도 있습니다',
     paused: '일시 중지됨',
     scheduleEnded: '종료됨',
     scheduleEndedHint: '일회성 일정이 종료되었습니다. 지금 실행하거나 실행 시간을 변경한 후 재개하세요.',
@@ -250,7 +250,7 @@ export default {
       sections: {
         basic: {
           title: '기본 정보',
-          desc: 'WeKnora 도우미가 작업을 실행합니다. 다른 에이전트에 위임하려면 작업에 에이전트와 맡길 일을 명시하세요.',
+          desc: 'SenseDeep 도우미가 작업을 실행합니다. 다른 에이전트에 위임하려면 작업에 에이전트와 맡길 일을 명시하세요.',
         },
         schedule: {
           title: '실행 시간',
@@ -849,7 +849,7 @@ export default {
     filterAllAgents: '전체 에이전트',
     claw: {
       title: 'WeKnora Skill',
-      subtitle: 'WeKnora REST API로 문서를 가져오고 하이브리드 검색(벡터+키워드)을 수행합니다. 파일/URL/Markdown 업로드 및 검색에 사용.',
+      subtitle: 'SenseDeep REST API로 문서를 가져오고 하이브리드 검색(벡터+키워드)을 수행합니다. 파일/URL/Markdown 업로드 및 검색에 사용.',
       capabilitiesTitle: 'Skill 기능',
       stepsTitle: '구성 단계',
       openApiSettings: 'API 정보 열기',
@@ -903,7 +903,7 @@ export default {
     },
     chrome: {
       title: '지식 관리 어시스턴트',
-      subtitle: '자체 호스팅 WeKnora와 함께: 사이드바에서 질문하고, 웹 페이지를 클리핑하며, Markdown 메모를 지식베이스에 저장하세요.',
+      subtitle: '자체 호스팅 SenseDeep와 함께: 사이드바에서 질문하고, 웹 페이지를 클리핑하며, Markdown 메모를 지식베이스에 저장하세요.',
       capabilitiesTitle: '핵심 기능',
       stepsTitle: '구성 단계',
       openApiSettings: 'API 정보 열기',
@@ -923,7 +923,7 @@ export default {
         },
         port: {
           title: '데스크톱: 고정 포트(권장)',
-          desc: 'WeKnora 데스크톱에서는 API 정보에서 고정 포트(예: 37841)를 설정하세요.'
+          desc: 'SenseDeep 데스크톱에서는 API 정보에서 고정 포트(예: 37841)를 설정하세요.'
         },
         api: {
           title: 'API 자격 증명',
@@ -2767,7 +2767,7 @@ export default {
     askUser: '사용자에게 질문'
   },
   assistant: {
-    title: 'WeKnora 어시스턴트',
+    title: 'SenseDeep 어시스턴트',
     newConversation: '새 대화',
     history: '대화 기록',
     untitledConversation: '제목 없는 대화',
@@ -2781,10 +2781,10 @@ export default {
     },
     welcomeTitle: '무엇을 도와드릴까요?',
     agentWelcomeDesc: '이 에이전트의 설정을 확인하고, 모델을 변경하거나 검색할 수 있는 지식 베이스를 확인할 수 있습니다.',
-    welcomeDesc: 'WeKnora 사용법을 안내하고, 지식과 문서를 정리하며, 에이전트·도구·자동화 설정을 도와드릴 수 있습니다.',
+    welcomeDesc: 'SenseDeep 사용법을 안내하고, 지식과 문서를 정리하며, 에이전트·도구·자동화 설정을 도와드릴 수 있습니다.',
     help: {
       label: '어시스턴트 설명',
-      title: 'WeKnora 어시스턴트가 할 수 있는 일',
+      title: 'SenseDeep 어시스턴트가 할 수 있는 일',
       identity: '어시스턴트는 사용자 본인으로 동작합니다. 보고 수정할 수 있는 범위는 이 공간에서 가진 역할과 같으며, 그 권한을 넘지 않습니다.',
       page: '열면 현재 페이지가 함께 붙습니다. 화면의 내용을 정리하고, 에이전트와 자동화를 설정하거나, 양식을 대신 채울 수 있습니다. 버튼을 누르거나 저장하지는 않습니다.',
       access: '입력창 아래에서 권한을 바꿀 수 있습니다. 읽기 전용, 수정 전 확인, 되돌릴 수 있는 수정은 자동 실행. 삭제는 항상 확인이 필요하며, 관리자가 정한 상한은 넘을 수 없습니다.',
@@ -3000,8 +3000,8 @@ export default {
           q3: 'Is there a ready-made request example?',
         },
         'integration-mcpserver': {
-          description: 'I can explain how to expose WeKnora as an MCP server, and which tools it offers.',
-          q1: 'How do I offer WeKnora as an MCP server?',
+          description: 'I can explain how to expose SenseDeep as an MCP server, and which tools it offers.',
+          q1: 'How do I offer SenseDeep as an MCP server?',
           q2: 'How does an external client connect?',
           q3: 'Which tools does this server expose?',
         },
@@ -3018,8 +3018,8 @@ export default {
           q3: 'Where does text I select in the extension get sent?',
         },
         'integration-claw': {
-          description: 'I can explain how to connect WeKnora to Claw, and which skill to install.',
-          q1: 'How do I connect WeKnora to Claw?',
+          description: 'I can explain how to connect SenseDeep to Claw, and which skill to install.',
+          q1: 'How do I connect SenseDeep to Claw?',
           q2: 'Which skill do I need to install?',
           q3: 'What can I do in Claw after it is connected?',
         },
@@ -3173,7 +3173,7 @@ export default {
       documentSummary: "이 문서의 핵심 결론은 무엇인가요?",
       failedDocuments: '이 지식 베이스에서 파싱에 실패한 문서는?',
       recentActivity: "최근에 업로드되거나 수정된 문서는 무엇인가요?",
-      formats: 'WeKnora는 어떤 문서 형식을 지원하나요?',
+      formats: 'SenseDeep는 어떤 문서 형식을 지원하나요?',
       createWiki: 'Wiki 지식 베이스는 어떻게 만드나요?',
       agents: "이 에이전트들은 각각 어떤 질문에 적합한가요?",
       messageSources: '이 답변의 근거는 무엇인가요?',
@@ -3185,7 +3185,7 @@ export default {
       modelSetup: '어떤 모델을 더 설정해야 하나요?',
       mcpSetup: 'MCP 서비스는 어떻게 연결하나요?',
       releaseHighlights: "현재 버전에서 주로 무엇이 바뀌었나요?",
-      gettingStarted: "WeKnora를 처음 사용할 때 무엇부터 설정해야 하나요?",
+      gettingStarted: "SenseDeep를 처음 사용할 때 무엇부터 설정해야 하나요?",
       workflow: "지식 베이스, 에이전트, 자동화를 어떻게 함께 활용하나요?",
       knowledgeOverview: "각 지식 베이스에서 어떤 내용을 찾을 수 있나요?",
       knowledgeType: "문서, FAQ, Wiki는 어떻게 구분해서 사용하나요?",
@@ -6126,7 +6126,7 @@ export default {
       systemActor: '시스템',
       actorWithAPIKey: '{actor} · API Key · {name}',
       actorAPIKey: 'API Key · {name}',
-      viaAssistant: 'WeKnora 어시스턴트 경유',
+      viaAssistant: 'SenseDeep 어시스턴트 경유',
       knowledgeBase: '지식 베이스',
       countItems: '{count}개 항목',
       titleWithCount: '{title} 외 {count}개',
@@ -6451,7 +6451,7 @@ export default {
     }
   },
   createChat: {
-    title: '안녕하세요, WeKnora입니다 — 당신의 지식을 손끝에',
+    title: '안녕하세요, SenseDeep입니다 — 당신의 지식을 손끝에',
     newSessionTitle: '새 세션',
     openProject: '프로젝트 선택',
     clearProject: '바인딩 해제',
@@ -6801,11 +6801,11 @@ export default {
     haveAccount: '이미 계정이 있으신가요?',
     backToLogin: '로그인으로 돌아가기',
     loginHint: '로그인하여 계속하세요. 처음이시라면 아래에서 계정을 만드세요.',
-    firstTime: 'WeKnora가 처음이신가요?',
+    firstTime: 'SenseDeep가 처음이신가요?',
     registerSuccess: '가입이 완료되었습니다. 로그인해주세요',
     registerFailed: '가입 실패',
     subtitle: 'RAG Q&A, ReAct 에이전트, Wiki 지식베이스 — 대규모 언어 모델 기반 엔터프라이즈 지식 프레임워크',
-    registerSubtitle: '계정을 만들고 WeKnora를 시작하세요',
+    registerSubtitle: '계정을 만들고 SenseDeep를 시작하세요',
     emailPlaceholder: '이메일 주소 입력',
     passwordPlaceholder: '비밀번호 입력',
     confirmPasswordPlaceholder: '비밀번호 다시 입력',
@@ -7122,7 +7122,7 @@ export default {
     title: '샌드박스 키',
     host: {
       title: '환경 변수',
-      description: '이 컴퓨터의 스킬에 쓰는 개인 키이며, WeKnora 시스템이나 배포 설정이 아닙니다.',
+      description: '이 컴퓨터의 스킬에 쓰는 개인 키이며, SenseDeep 시스템이나 배포 설정이 아닙니다.',
       helpAria: '환경 변수 설명',
       introRuntimeBody: '스킬이 이 컴퓨터에서 실행될 때 주입됩니다. 대화 중에 바로 제공할 수도 있습니다. 저장 후에는 평문을 다시 보여 주지 않습니다.',
       loadFailed: '환경 변수를 불러오지 못했습니다.',
@@ -7131,7 +7131,7 @@ export default {
       nameInvalid: '이 이름은 사용할 수 없습니다. 예약된 이름(예: PATH, WEKNORA_로 시작하는 이름)은 거부됩니다.',
       deleteConfirm: '{name}을(를) 삭제할까요? 이후 이 컴퓨터에서 실행할 때 더 이상 포함되지 않습니다.',
     },
-    description: '스킬과 샌드박스에 쓰는 개인 키이며, WeKnora 시스템이나 배포 설정이 아닙니다.',
+    description: '스킬과 샌드박스에 쓰는 개인 키이며, SenseDeep 시스템이나 배포 설정이 아닙니다.',
     helpAria: '샌드박스 키 설명',
     introPersonalTitle: '나만의 값',
     introPersonalBody: '내 대화와 실행에만 주입됩니다. 다른 구성원은 볼 수 없고, 그들의 값이 내 값을 대체하지도 않습니다.',
@@ -9241,8 +9241,8 @@ export default {
     reopen: '사용 가이드',
     steps: {
       assistant: {
-        title: 'WeKnora 어시스턴트를 만나보세요',
-        desc: 'WeKnora의 버전, 기능, 설정에 대해 질문할 수 있습니다. 현재 페이지를 바탕으로 사용자의 권한 내에서 에이전트를 만들고, 작업을 예약하고, 지식을 정리할 수도 있습니다.'
+        title: 'SenseDeep 어시스턴트를 만나보세요',
+        desc: 'SenseDeep의 버전, 기능, 설정에 대해 질문할 수 있습니다. 현재 페이지를 바탕으로 사용자의 권한 내에서 에이전트를 만들고, 작업을 예약하고, 지식을 정리할 수도 있습니다.'
       },
       done: {
         title: '준비 완료',
@@ -9266,10 +9266,10 @@ export default {
       },
       knowledge: {
         title: '지식 베이스 만들기',
-        desc: '모든 것의 시작점입니다. 문서, 웹페이지, FAQ를 업로드하면 WeKnora가 자동으로 분석하고 색인합니다. 여기를 클릭해 지식 베이스로 이동하세요.'
+        desc: '모든 것의 시작점입니다. 문서, 웹페이지, FAQ를 업로드하면 SenseDeep가 자동으로 분석하고 색인합니다. 여기를 클릭해 지식 베이스로 이동하세요.'
       },
       welcome: {
-        title: 'WeKnora에 오신 것을 환영합니다',
+        title: 'SenseDeep에 오신 것을 환영합니다',
         desc: '몇 단계만으로 지식 베이스, 대화, 에이전트의 핵심 사용법을 안내합니다. \'다음\'을 눌러 시작하세요.'
       }
     }

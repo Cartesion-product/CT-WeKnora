@@ -2382,10 +2382,10 @@ const downloadExampleOptions = computed(() => [
 // 示例数据
 const exampleData: FAQEntryPayload[] = [
   {
-    standard_question: '什么是 WeKnora？',
-    answers: ['WeKnora 是一个智能知识库管理系统', '它支持多种知识库类型和导入方式'],
-    similar_questions: ['WeKnora 是什么？', '介绍一下 WeKnora'],
-    negative_questions: ['这不是 WeKnora', '与 WeKnora 无关'],
+    standard_question: '如何查找产品说明？',
+    answers: ['可以在知识库中搜索产品名称或功能关键词', '也可以通过智能问答获取相关文档和引用'],
+    similar_questions: ['在哪里查看产品文档？', '怎样搜索产品资料？'],
+    negative_questions: ['如何修改登录密码？', '今天的天气怎么样？'],
     tag_name: '产品介绍',
   },
   {

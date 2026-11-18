@@ -98,6 +98,35 @@
     }
 
 /* 全局深色模式滚动条样式 */
+:root:root,
+:root:root[theme-mode="light"] {
+    --td-brand-color-1: #e6f3f1;
+    --td-brand-color-2: #c7e5e0;
+    --td-brand-color-3: #4c9993;
+    --td-brand-color-4: #166b68;
+    --td-brand-color-5: #115754;
+    --td-brand-color-6: #0d4644;
+    --td-brand-color-7: #0b3937;
+    --td-brand-color-8: #092f2d;
+    --td-brand-color-9: #072522;
+    --td-brand-color-10: #041b19;
+    --td-bg-color-sidebar: #f5f8f8;
+    --td-bg-color-settings-modal: #f5f8f8;
+}
+
+:root:root[theme-mode="dark"] {
+    --td-brand-color-1: #123331;
+    --td-brand-color-2: #174945;
+    --td-brand-color-3: #1d5c57;
+    --td-brand-color-4: #26736d;
+    --td-brand-color-5: #378d85;
+    --td-brand-color-6: #50a59b;
+    --td-brand-color-7: #72b9b0;
+    --td-brand-color-8: #95cec7;
+    --td-brand-color-9: #b7e1dc;
+    --td-brand-color-10: #dbefec;
+}
+
 :root[theme-mode="dark"] *::-webkit-scrollbar-thumb {
     background-color: #4b4b4b !important;
 }
