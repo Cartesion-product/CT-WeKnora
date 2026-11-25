@@ -1,9 +1,12 @@
 <template>
     <div class="dialogue-wrap">
         <div class="dialogue-answers">
+            <div class="chat-ocean-emblem" aria-hidden="true"><BrandMark icon-only /></div>
+            <div class="chat-ocean-label" aria-hidden="true">SenseDeep / Knowledge in depth</div>
             <div class="dialogue-title" style="--wails-draggable: drag">
                 <span style="--wails-draggable: drag">{{ $t('createChat.title') }}</span>
             </div>
+            <p class="chat-ocean-description">{{ $t('createChat.description') }}</p>
             <!-- 推荐问题 -->
             <div ref="sqContainerRef" class="suggested-questions-container">
                 <!-- 骨架屏占位 -->
@@ -59,10 +62,14 @@
                 </div>
                 <InputField ref="inputFieldRef" @send-msg="sendMsg"></InputField>
             </div>
+            <nav class="chat-workspace-links" :aria-label="$t('knowledgeBase.title')">
+                <RouterLink to="/platform/knowledge-bases"><ResourceIcon type="knowledge" :size="18" />{{ $t('knowledgeBase.title') }}<span aria-hidden="true">↗</span></RouterLink>
+                <RouterLink to="/platform/agents"><ResourceIcon type="agent" :size="18" />{{ $t('agent.title') }}<span aria-hidden="true">↗</span></RouterLink>
+                <RouterLink to="/platform/artifacts"><ResourceIcon type="artifact" :size="18" />{{ $t('artifactLibrary.title') }}<span aria-hidden="true">↗</span></RouterLink>
+            </nav>
         </div>
     </div>
 
-    <ContextualGuide tour="chat" :when="showChatContextualGuide" />
 
     <!-- 知识库编辑器（创建/编辑统一组件） -->
     <KnowledgeBaseEditorModal :visible="uiStore.showKBEditorModal" :mode="uiStore.kbEditorMode"
@@ -71,7 +78,8 @@
 </template>
 <script setup lang="ts">
 import { ref, watch, onMounted, nextTick, computed } from 'vue';
-import ContextualGuide from '@/components/ContextualGuide.vue';
+import BrandMark from '@/components/BrandMark.vue';
+import ResourceIcon from '@/components/icons/ResourceIcon.vue';
 import InputField from '@/components/Input-field.vue';
 import { createSessions } from "@/api/chat/index";
 import { pickHostProjectDir } from '@/utils/desktopProjectDir';
@@ -110,10 +118,6 @@ const hostSandboxEnabled = computed(() =>
 );
 const selectedProjectDir = ref('');
 const pickingProjectDir = ref(false);
-
-const showChatContextualGuide = computed(() => {
-    return route.name === 'globalCreatChat' || route.name === 'kbCreatChat';
-});
 
 // ===== 推荐问题 =====
 const suggestedQuestions = ref<SuggestedQuestion[]>([]);
@@ -321,7 +325,20 @@ async function openProjectDir() {
     display: flex;
     justify-content: center;
     align-items: center;
-    // position: relative;
+    position: relative;
+    isolation: isolate;
+    padding: 40px 32px;
+    overflow-y: auto;
+    &::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        background: var(--sd-ocean-poster) center / cover;
+        opacity: .11;
+        mask-image: linear-gradient(#000, transparent 85%);
+        pointer-events: none;
+    }
 }
 
 .dialogue-answers {
@@ -329,14 +346,50 @@ async function openProjectDir() {
     flex-flow: column;
     align-items: center;
     width: 100%;
-    max-width: 960px;
-    gap: 24px;
+    max-width: 800px;
+    gap: 20px;
+    margin-block: auto;
 
     :deep(.answers-input) {
         position: static;
         transform: translateX(0);
     }
 }
+
+.chat-ocean-emblem {
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    border: 1px solid var(--td-component-border);
+    border-radius: 50%;
+    background: var(--sd-card-surface);
+    box-shadow: 0 0 0 12px color-mix(in srgb, var(--td-brand-color) 4%, transparent);
+    margin-bottom: 6px;
+    :deep(.brand-mark__icon) { width: 56px; height: 56px; }
+    :deep(.brand-mark__depth) { color: var(--td-brand-color); opacity: .5; }
+}
+.chat-ocean-label { color: var(--td-text-color-secondary); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; }
+.chat-ocean-description { margin: -8px 0 8px; max-width: 560px; color: var(--td-text-color-secondary); font-size: 13px; line-height: 1.8; text-align: center; }
+.chat-workspace-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    a { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border: 1px solid var(--td-component-stroke); border-radius: 8px; text-decoration: none; color: var(--td-text-color-secondary); font-size: 12px; background: var(--sd-control-surface); transition: border-color .2s, transform .2s; }
+    a:hover { color: var(--td-brand-color); border-color: var(--td-component-border); transform: translateY(-2px); }
+    span { margin-left: 12px; color: var(--td-brand-color); }
+}
+.dialogue-answers :deep(.rich-input-container) { background: var(--sd-control-surface); border-radius: 18px; border-color: var(--td-component-border); box-shadow: var(--sd-shadow); }
+@media (max-width: 720px) {
+    .dialogue-wrap { padding: 36px 16px; }
+    .chat-ocean-emblem { width: 64px; height: 64px; }
+    .chat-ocean-emblem :deep(.brand-mark__icon) { width: 42px; height: 42px; }
+    .chat-workspace-links { gap: 6px; }
+    .chat-workspace-links a { padding: 10px; gap: 6px; }
+    .chat-workspace-links span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .chat-workspace-links a { transition: none; transform: none; } }
 
 .create-chat-composer {
     display: flex;
@@ -403,8 +456,10 @@ async function openProjectDir() {
     display: flex;
     color: var(--td-text-color-primary);
     font-family: var(--app-font-family);
-    font-size: 28px;
-    font-weight: 600;
+    font-size: clamp(24px, 2.8vw, 36px);
+    font-weight: 500;
+    letter-spacing: .03em;
+    text-align: center;
     align-items: center;
     margin-bottom: 0;
 

@@ -1,9 +1,9 @@
 <template>
   <main class="workspace-onboarding">
+    <OceanBackdrop />
+    <div class="workspace-brand"><BrandMark variant="ocean" /></div>
     <section class="workspace-card">
-      <div class="workspace-mark" aria-hidden="true">
-        <t-icon name="system-sum" size="30px" />
-      </div>
+      <div class="workspace-mark" aria-hidden="true"><t-icon name="system-sum" size="24px" /></div>
       <h1 v-if="authStore.canCreateTenant">{{ $t('auth.workspaceOnboarding.title') }}</h1>
       <h1 v-else>{{ $t('auth.workspaceOnboarding.inviteOnlyTitle') }}</h1>
       <p v-if="authStore.canCreateTenant" class="workspace-description">
@@ -72,6 +72,8 @@ import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import CreateTenantDialog from '@/components/CreateTenantDialog.vue'
 import MyInvitationsDialog from '@/components/MyInvitationsDialog.vue'
+import BrandMark from '@/components/BrandMark.vue'
+import OceanBackdrop from '@/components/OceanBackdrop.vue'
 import { logout as logoutApi } from '@/api/auth'
 import type { TenantInfo } from '@/api/tenant'
 import { useAuthStore } from '@/stores/auth'
@@ -124,32 +126,55 @@ async function handleLogout() {
 
 <style scoped lang="less">
 .workspace-onboarding {
-  min-height: 100vh;
+  --td-text-color-primary: #f0faf7;
+  --td-text-color-secondary: #c6dedc;
+  --td-brand-color: #b5efd9;
+  --td-brand-color-hover: #d3f8e9;
+  --td-brand-color-active: #98dec7;
+  --td-brand-color-light: rgba(181, 239, 217, .12);
+  --td-text-color-anti: #102e31;
+  --td-bg-color-container: rgba(3, 24, 33, .48);
+  --td-bg-color-container-hover: rgba(181, 239, 217, .12);
+  --td-bg-color-secondarycontainer: rgba(181, 239, 217, .1);
+  --td-component-stroke: rgba(211, 239, 235, .28);
+  min-height: 100dvh;
   display: grid;
-  place-items: center;
-  padding: 32px 20px;
-  background:
-    radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--td-brand-color) 12%, transparent), transparent 38%),
-    var(--td-bg-color-page);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+  align-items: center;
+  padding: 96px max(5vw, 24px) 48px;
+  box-sizing: border-box;
+  isolation: isolate;
+  background: #0b3e47;
+}
+
+.workspace-brand {
+  position: absolute;
+  top: 28px;
+  left: max(5vw, 24px);
+  z-index: 1;
 }
 
 .workspace-card {
-  width: min(520px, 100%);
-  padding: 44px;
+  grid-column: 2;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 42px;
   border: 1px solid var(--td-component-stroke);
-  border-radius: 20px;
+  border-radius: 8px;
   background: var(--td-bg-color-container);
-  box-shadow: var(--td-shadow-2);
   text-align: center;
 }
 
 .workspace-mark {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 22px;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 20px;
   display: grid;
   place-items: center;
-  border-radius: 18px;
+  border: 1px solid var(--td-component-stroke);
+  border-radius: 8px;
   color: var(--td-brand-color);
   background: var(--td-brand-color-light);
 }
@@ -233,9 +258,21 @@ h1 {
   color: var(--td-brand-color);
 }
 
+@media (max-width: 900px) {
+  .workspace-onboarding {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .workspace-card {
+    grid-column: 1;
+    max-width: 520px;
+  }
+}
+
 @media (max-width: 560px) {
   .workspace-card {
-    padding: 32px 22px;
+    padding: 28px 20px;
   }
 
   .workspace-actions {

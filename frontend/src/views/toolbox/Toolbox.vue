@@ -1,25 +1,16 @@
 <template>
   <main class="toolbox-page">
-    <header class="toolbox-header" style="--wails-draggable: drag">
-      <div class="toolbox-title-row" style="--wails-draggable: drag">
-        <h2 style="--wails-draggable: drag">
-          <ResourceIcon type="toolbox" :size="24" />
-          {{ t('toolbox.title') }}
-        </h2>
+    <WorkspaceHeading :title="t('toolbox.title')" :subtitle="t(selectedItem?.description ?? 'toolbox.description')" section="06 / Toolbox">
         <t-button v-if="selectedItem && 'action' in selectedItem" variant="text" theme="default" size="small"
           class="toolbox-action" style="--wails-draggable: no-drag" @click="panel?.openAdd?.()">
           <template #icon><t-icon :name="selectedItem.icon" size="16px" /></template>
           {{ t(selectedItem.action) }}
         </t-button>
-      </div>
-      <p class="toolbox-subtitle" style="--wails-draggable: drag">
-        {{ t(selectedItem?.description ?? 'toolbox.description') }}
-        <t-tooltip v-if="selectedItem && 'help' in selectedItem" :content="t(selectedItem.help)" placement="bottom"
-          overlay-class-name="skill-settings__help-tooltip">
-          <t-icon name="help-circle" class="toolbox-help" :aria-label="t(selectedItem.help)" />
-        </t-tooltip>
-      </p>
-    </header>
+      <t-tooltip v-if="selectedItem && 'help' in selectedItem" :content="t(selectedItem.help)" placement="bottom"
+        overlay-class-name="skill-settings__help-tooltip">
+        <t-icon name="help-circle" class="toolbox-help" :aria-label="t(selectedItem.help)" />
+      </t-tooltip>
+    </WorkspaceHeading>
 
     <template v-if="visibleItems.length">
       <div class="toolbox-tabbar">
@@ -56,6 +47,7 @@
 </template>
 
 <script setup lang="ts">
+import WorkspaceHeading from '@/components/WorkspaceHeading.vue'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

@@ -110,8 +110,12 @@
     --td-brand-color-8: #092f2d;
     --td-brand-color-9: #072522;
     --td-brand-color-10: #041b19;
-    --td-bg-color-sidebar: #f5f8f8;
+    --td-bg-color-page: #f8faf9;
+    --td-bg-color-sidebar: #eef4f2;
     --td-bg-color-settings-modal: #f5f8f8;
+    --td-bg-color-secondarycontainer: #edf3f1;
+    --td-bg-color-container-hover: #f1f6f3;
+    --td-component-stroke: #dfe9e5;
 }
 
 :root:root[theme-mode="dark"] {
@@ -125,6 +129,11 @@
     --td-brand-color-8: #95cec7;
     --td-brand-color-9: #b7e1dc;
     --td-brand-color-10: #dbefec;
+    --td-bg-color-page: #171f20;
+    --td-bg-color-sidebar: #1d292a;
+    --td-bg-color-secondarycontainer: #263435;
+    --td-bg-color-container-hover: #2a3939;
+    --td-component-stroke: #334647;
 }
 
 :root[theme-mode="dark"] *::-webkit-scrollbar-thumb {

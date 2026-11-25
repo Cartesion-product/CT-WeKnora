@@ -23,7 +23,7 @@
                     :can-rewind="canRewind"
                     @fork="emit('fork', $event)"
                     @rewind="emit('rewind', $event)"
-                    @render-complete-change="emit('render-complete-change', $event)" />
+                    @render-complete-change="handleAgentRenderComplete" />
             </div>
             <template v-else>
                 <!-- A plain answer has no timeline to put the memory row on, so
@@ -40,7 +40,7 @@
                     :can-rewind="canRewind"
                     @fork="emit('fork', $event)"
                     @rewind="emit('rewind', $event)"
-                    @render-complete-change="emit('render-complete-change', $event)" />
+                    @render-complete-change="handleAgentRenderComplete" />
             </template>
             <deepThink :deepSession="session" v-if="session.showThink && !session.isAgentMode"></deepThink>
         </div>
@@ -130,25 +130,12 @@
             <div v-if="isImgLoading" class="img_loading"><t-loading size="small"></t-loading><span>{{
                 $t('common.loading') }}</span></div>
         </div>
-        <div v-if="videoReferences.length" class="answer-video-references">
+        <div v-if="videoReferences.length && (session.isAgentMode ? agentAnswerFullyRendered : answerFullyRendered)" class="answer-video-references">
             <span class="answer-video-references__label">{{ t('videoKnowledge.relatedVideos') }}</span>
-            <button v-for="video in videoReferences" :key="video.key" type="button" class="answer-video-references__item"
-                @click="selectedVideo = video">
-                <t-icon name="play-circle" />
-                <span class="answer-video-references__body">
-                    <span class="answer-video-references__name">{{ video.name }}</span>
-                    <span v-if="video.snippet" class="answer-video-references__snippet">{{ video.snippet }}</span>
-                </span>
-                <span v-if="video.time" class="answer-video-references__time">{{ video.time }}</span>
-            </button>
+            <div class="answer-video-references__grid">
+                <ChatVideoCard v-for="video in videoReferences" :key="video.key" :video="video" />
+            </div>
         </div>
-        <t-dialog v-model:visible="videoDialogVisible" :header="selectedVideo?.name || t('videoKnowledge.tab')"
-            :footer="false" width="min(960px, 94vw)" destroy-on-close>
-            <VideoKnowledgeDetail v-if="selectedVideo" class="answer-video-references__player"
-                :knowledge-id="selectedVideo.knowledgeId" :active="videoDialogVisible"
-                :start-ms="selectedVideo.startMs" :segment-id="selectedVideo.segmentId"
-                :processing-run-id="selectedVideo.processingRunId" />
-        </t-dialog>
         <picturePreview :reviewImg="reviewImg" :reviewUrl="reviewUrl" @closePreImg="closePreImg"></picturePreview>
         <Teleport to="body">
             <ChatCitationFloat :float="citationFloat" :on-enter="cancelCitationClose"
@@ -177,8 +164,9 @@ import ChatRequestInfoButton from '@/components/ChatRequestInfoButton.vue';
 import ChatCitationFloat from '@/components/ChatCitationFloat.vue';
 import picturePreview from '@/components/picture-preview.vue';
 import ChatArtifactsDrawer from './ChatArtifactsDrawer.vue';
-import VideoKnowledgeDetail from '@/components/VideoKnowledgeDetail.vue';
+import ChatVideoCard from './ChatVideoCard.vue';
 import { getVideoDetail } from '@/api/knowledge-base/video';
+import { selectChatVideoReferences } from '@/utils/chatVideoReferences';
 import { isCollectingSkillArtifacts } from '@/utils/skillArtifacts';
 import { useArtifactArriveMotion } from '@/composables/useArtifactArriveMotion';
 import { useChatSandboxPanel } from '@/composables/useChatSandboxPanel';
@@ -283,7 +271,6 @@ const props = defineProps({
         default: false
     }
 });
-const selectedVideo = ref(null);
 const verifiedVideoMedia = ref({});
 const unverifiedVideoReferences = computed(() => (props.session?.knowledge_references || [])
     .filter(reference => reference?.knowledge_id && reference?.id && !reference.media &&
@@ -311,29 +298,12 @@ const effectiveKnowledgeReferences = computed(() => (props.session?.knowledge_re
     if (reference?.media || !reference?.knowledge_id || !/\.mp4$/i.test(reference.knowledge_filename || reference.knowledge_title || '')) return reference;
     return { ...reference, media: verifiedVideoMedia.value[`${reference.knowledge_id}:${reference.id}`] || { type: 'video' } };
 }));
-const videoDialogVisible = computed({
-    get: () => !!selectedVideo.value,
-    set: (visible) => { if (!visible) selectedVideo.value = null; },
-});
-const videoReferences = computed(() => {
-    const seen = new Set();
-    return effectiveKnowledgeReferences.value.flatMap((reference) => {
-        const media = reference?.media;
-        if (media?.type !== 'video' || !reference.knowledge_id) return [];
-        const key = `${reference.knowledge_id}:${media.segment_id || media.start_ms || media.frame_ms || ''}`;
-        if (seen.has(key)) return [];
-        seen.add(key);
-        const position = media.start_ms ?? media.frame_ms;
-        const ms = position ?? 0;
-        const seconds = Math.floor(ms / 1000);
-        const time = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-        return [{ key, knowledgeId: reference.knowledge_id,
-            name: reference.knowledge_filename || reference.knowledge_title || t('videoKnowledge.tab'),
-            time: position == null ? '' : time, snippet: String(reference.content || '').replace(/\s+/g, ' ').slice(0, 140),
-            startMs: position, segmentId: media.segment_id,
-            processingRunId: media.processing_run_id }];
-    });
-});
+const videoReferences = computed(() => selectChatVideoReferences(effectiveKnowledgeReferences.value));
+const agentAnswerFullyRendered = ref(false);
+const handleAgentRenderComplete = (ready) => {
+    agentAnswerFullyRendered.value = Boolean(ready);
+    emit('render-complete-change', ready);
+};
 // The popover evaluates sessionId during setup, so it must follow defineProps.
 const { float: citationFloat, rebind: rebindCitations, cancelClose: cancelCitationClose, scheduleClose: scheduleCitationClose } = useChatCitationPopover(parentMd, {
     getKnowledgeReferences: () => effectiveKnowledgeReferences.value,
@@ -651,15 +621,10 @@ onBeforeUnmount(() => {
     }
 }
 
-.answer-video-references { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 12px 0; }
-.answer-video-references__label { font-size: 12px; color: var(--td-text-color-secondary); margin-right: 3px; }
-.answer-video-references__item { display: inline-flex; align-items: center; gap: 6px; max-width: min(100%, 310px); padding: 6px 9px; border: 1px solid var(--td-component-stroke); border-radius: 5px; background: var(--td-bg-color-container); color: var(--td-text-color-primary); font-size: 12px; cursor: pointer; }
-.answer-video-references__item:hover { border-color: var(--td-brand-color); color: var(--td-brand-color); }
-.answer-video-references__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.answer-video-references__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.answer-video-references__snippet { color: var(--td-text-color-secondary); overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-.answer-video-references__time { flex: none; color: var(--td-text-color-secondary); }
-.answer-video-references__player { height: min(70vh, 680px); min-height: 320px; }
+.answer-video-references { margin: 16px 0; }
+.answer-video-references__label { display: block; margin-bottom: 8px; font-size: 12px; color: var(--td-text-color-secondary); }
+.answer-video-references__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 10px; max-width: 800px; }
+@media (max-width: 580px) { .answer-video-references__grid { grid-template-columns: 1fr; max-width: 380px; } }
 
 .rag-answer-stack {
     display: flex;

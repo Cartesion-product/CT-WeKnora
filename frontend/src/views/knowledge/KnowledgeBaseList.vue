@@ -1,14 +1,8 @@
 <template>
   <div class="kb-list-container">
     <div class="kb-list-content">
-      <div class="header" style="--wails-draggable: drag">
-        <div class="header-title" style="--wails-draggable: drag">
-          <div class="title-row" style="--wails-draggable: drag">
-            <h2 style="--wails-draggable: drag">
-              <ResourceIcon type="knowledge" :size="24" />
-              {{ $t('knowledgeBase.title') }}
-            </h2>
-            <div class="header-actions" :class="{ 'header-actions-lite': authStore.isLiteMode }" style="--wails-draggable: no-drag">
+      <WorkspaceHeading :title="$t('knowledgeBase.title')" :subtitle="$t('knowledgeList.subtitle')" section="01 / Knowledge">
+        <div class="header-actions" :class="{ 'header-actions-lite': authStore.isLiteMode }" style="--wails-draggable: no-drag">
               <ResourceListToolbar v-if="authStore.isLiteMode" hide-scopes v-model="spaceSelection" v-model:query="keyword" />
               <ResourceSortControl v-model="selectedResourceSort" />
               <t-tooltip v-if="authStore.hasRole('contributor')" :content="$t('knowledgeList.create')" placement="bottom">
@@ -19,10 +13,7 @@
                  </t-button>
                </t-tooltip>
              </div>
-          </div>
-          <p class="header-subtitle" style="--wails-draggable: drag">{{ $t('knowledgeList.subtitle') }}</p>
-        </div>
-      </div>
+      </WorkspaceHeading>
       <ResourceListToolbar v-if="!authStore.isLiteMode" v-model="spaceSelection" v-model:query="keyword" :count-all="allKnowledgeBases"
       :count-mine="kbs.length" :count-by-org="effectiveSharedCountByOrg" :count-favorites="kbFavoritesCount"
       :count-recents="kbRecentsCount" />
@@ -706,11 +697,11 @@
       </Transition>
     </Teleport>
 
-    <ContextualGuide tour="kbList" :when="showKbListContextualGuide" />
   </div>
 </template>
 
 <script setup lang="ts">
+import WorkspaceHeading from '@/components/WorkspaceHeading.vue'
 import { useAssistantDataChange } from '@/utils/assistantDataChange'
 import { onMounted, onUnmounted, ref, computed, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -734,9 +725,7 @@ import { matchesResourceQuery } from '@/utils/resourceListSearch'
 import ResourceOriginBadge from '@/components/ResourceOriginBadge.vue'
 import { shouldShowResourceOriginBadge } from '@/utils/card-list-badge'
 import { permissionCanManageKB } from '@/utils/kbPermission'
-import ContextualGuide from '@/components/ContextualGuide.vue'
 import ResourceSortControl from '@/components/ResourceSortControl.vue'
-import { isContextualGuideDone, markContextualGuideDone } from '@/config/contextualGuides'
 import { useTenantModelReadiness } from '@/composables/useTenantModelReadiness'
 import { useI18n } from 'vue-i18n'
 import { useListUrlState } from '@/composables/useListUrlState'
@@ -1111,18 +1100,6 @@ const unsearchedFilteredKnowledgeBases = computed(() => {
   )
 })
 const filteredKnowledgeBases = computed(() => unsearchedFilteredKnowledgeBases.value.filter(item => matchesResourceQuery(item, keyword.value)))
-
-const showKbListEmpty = computed(() => {
-  if (loading.value || keyword.value.trim()) return false
-  if (!authStore.hasRole('contributor')) return false
-  if (spaceSelection.value === 'all' && filteredKnowledgeBases.value.length === 0) return true
-  if (spaceSelection.value === 'mine' && kbs.value.length === 0) return true
-  return false
-})
-
-const showKbListContextualGuide = computed(
-  () => showKbListEmpty.value && !uiStore.showKBEditorModal,
-)
 
 const applyKbListData = (data: any[]) => {
   kbs.value = data.map((kb: any) => ({
@@ -1511,7 +1488,6 @@ const goSettings = (id: string) => {
 
 // 创建知识库
 const handleCreateKnowledgeBase = () => {
-  markContextualGuideDone('kbList')
   // 无模型时仍打开创建向导，并定位到模型配置页；用户可在向导内添加模型，无需先跳转系统设置
   const initialSection =
     modelsReadyLoaded.value && !isReadyForDocumentKb.value ? 'models' : undefined
@@ -1521,13 +1497,9 @@ const handleCreateKnowledgeBase = () => {
 // 知识库编辑器成功回调（创建或编辑成功）
 const handleKBEditorSuccess = (kbId: string) => {
   console.log('[KnowledgeBaseList] knowledge operation success:', kbId)
-  const shouldOpenDetailForUploadGuide = !isContextualGuideDone('kbDetail')
   // 列表页编辑同样要让单 KB 详情缓存失效，否则侧栏 / 详情页 60s 内仍显示旧信息
   chatResources.invalidateKnowledgeBaseDetail(kbId)
   fetchList(true).then(() => {
-    if (shouldOpenDetailForUploadGuide && kbId && !uiStore.showKBEditorModal) {
-      goDetail(kbId)
-    }
     // 如果是从路由参数中获取的高亮ID，触发闪烁效果
     if (route.query.highlightKbId === kbId) {
       triggerHighlightFlash(kbId)
@@ -1760,10 +1732,12 @@ watch(keyword, () => { collapsedKbSections.value = new Set() })
   .resource-card-footer();
 
   :deep(.kb-type-avatar) {
-    width: 16px;
-    height: 16px;
-    background: transparent;
-    color: var(--td-text-color-secondary);
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    border: 1px solid color-mix(in srgb, var(--td-brand-color) 24%, transparent);
+    background: color-mix(in srgb, var(--td-brand-color) 8%, transparent);
+    color: var(--td-brand-color);
     transition: color var(--app-motion-fast);
   }
 

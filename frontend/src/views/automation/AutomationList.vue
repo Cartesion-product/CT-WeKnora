@@ -1,11 +1,6 @@
 <template>
   <main class="automation-page">
-    <header class="automation-page__header" style="--wails-draggable: drag">
-      <div class="automation-page__title-row" style="--wails-draggable: drag">
-        <h2 style="--wails-draggable: drag">
-          <ResourceIcon type="automation" :size="24" />
-          {{ t('automation.title') }}
-        </h2>
+    <WorkspaceHeading :title="t('automation.title')" :subtitle="t('automation.description')" section="05 / Automation">
         <div class="automation-page__tools" style="--wails-draggable: no-drag">
           <t-input v-if="automations.length > 0" v-model="query" class="automation-page__search"
             :placeholder="t('menu.search')" :aria-label="t('menu.search')" clearable>
@@ -16,9 +11,7 @@
             {{ t('automation.add') }}
           </t-button>
         </div>
-      </div>
-      <p class="automation-page__subtitle" style="--wails-draggable: drag">{{ t('automation.description') }}</p>
-    </header>
+    </WorkspaceHeading>
 
     <div v-if="loading" class="loading-container">
       <t-loading :text="t('common.loading')" />
@@ -99,6 +92,7 @@
 </template>
 
 <script setup lang="ts">
+import WorkspaceHeading from '@/components/WorkspaceHeading.vue'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

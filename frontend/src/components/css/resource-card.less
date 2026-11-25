@@ -2,8 +2,8 @@
 // Page-specific classes retain existing actions and permission gates.
 .resource-card-grid() {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
   align-items: stretch;
 }
 
@@ -13,17 +13,18 @@
   flex-direction: column;
   box-sizing: border-box;
   min-width: 0;
-  min-height: 132px;
-  padding: 12px;
+  min-height: 188px;
+  padding: 22px;
   border: 1px solid var(--td-component-stroke);
-  border-radius: var(--app-radius-md);
-  background: var(--td-bg-color-container);
+  border-radius: 14px;
+  background: var(--sd-card-surface, var(--td-bg-color-container));
   cursor: pointer;
-  transition: border-color var(--app-motion-fast) ease, box-shadow var(--app-motion-fast) ease;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      border-color: var(--td-component-border);
+      transform: translateY(-3px);
+      border-color: color-mix(in srgb, var(--td-brand-color) 32%, var(--td-component-stroke));
       box-shadow:
         0 1px 2px color-mix(in srgb, var(--td-text-color-primary) 3%, transparent),
         0 3px 10px color-mix(in srgb, var(--td-text-color-primary) 4%, transparent);
@@ -37,23 +38,23 @@
   .card-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     min-width: 0;
-    min-height: 28px;
+    min-height: 40px;
     padding-right: 28px;
-    margin-bottom: 6px;
+    margin-bottom: 18px;
   }
   &:has(.kb-favorite-star, .agent-favorite-star) .card-header { padding-right: 60px; }
   .card-header-left,
-  .card-title-block { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+  .card-title-block { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
   .card-title {
     display: block;
     flex: 1;
     min-width: 0;
     color: var(--td-text-color-primary);
-    font-size: var(--app-text-base);
+    font-size: 16px;
     font-weight: 600;
-    line-height: 20px;
+    line-height: 24px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -64,7 +65,7 @@
     flex: 1;
     min-width: 0;
     min-height: 36px;
-    margin-bottom: 8px;
+    margin-bottom: 18px;
     overflow: hidden;
   }
   .card-description {
@@ -74,7 +75,7 @@
     line-clamp: 2;
     color: var(--td-text-color-secondary);
     font-size: var(--app-text-sm);
-    line-height: 18px;
+    line-height: 22px;
     overflow: hidden;
 
     &.is-empty { color: var(--td-text-color-placeholder); }
@@ -87,17 +88,23 @@
     gap: 8px;
     min-width: 0;
     margin-top: auto;
-    padding-top: 6px;
+    padding-top: 12px;
     border-top: 1px solid color-mix(in srgb, var(--td-component-stroke) 60%, transparent);
   }
   .feature-badges { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 
   .builtin-avatar,
   .org-avatar,
+  :deep(.resource-card-avatar),
   :deep(.agent-avatar) {
     flex-shrink: 0;
-    width: 28px;
-    height: 28px;
+    flex-basis: 40px;
+    width: 40px;
+    height: 40px;
+    color: var(--td-brand-color);
+    border-radius: 11px;
+    border: 1px solid color-mix(in srgb, var(--td-brand-color) 24%, transparent);
+    background: color-mix(in srgb, var(--td-brand-color) 8%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -106,8 +113,8 @@
   .more-wrap,
   .shared-detail-trigger {
     position: absolute;
-    right: 8px;
-    top: 12px;
+    right: 12px;
+    top: 25px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -128,7 +135,7 @@
     &:hover { border-color: var(--td-component-stroke); box-shadow: none; }
     .card-header { padding-right: 0; }
   }
-  @media (prefers-reduced-motion: reduce) { transition: none; }
+  @media (prefers-reduced-motion: reduce) { transition: none; &:hover { transform: none; } }
 }
 
 .resource-card-quiet() {
@@ -137,7 +144,7 @@
     line-height: 20px;
     &.is-empty { font-size: var(--app-text-sm); }
   }
-  .card-bottom { border-top: 0; padding-top: 4px; }
+  .card-bottom { padding-top: 12px; }
   .resource-card-footer();
   :deep(.resource-origin-badge) {
     background: transparent;
@@ -277,7 +284,7 @@
   display: flex;
   flex-direction: column;
   margin: 0;
-  padding: 20px 28px 0;
+  padding: 28px 32px 0;
   html.wails-desktop & { padding-top: 42px; }
   @media (max-width: 720px) { padding: var(--app-space-4) var(--app-space-4) 0; }
 }
@@ -287,16 +294,17 @@
   min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--app-space-3) 0 var(--app-space-6);
+  padding: 16px 0 32px;
 }
 .resource-list-header() {
   .header {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     padding-right: 0;
     flex-shrink: 0;
     .header-title { width: 100%; gap: 4px; }
     .title-row { flex-wrap: wrap; gap: 12px; }
-    h2 { margin-right: auto; }
+    h2 { margin-right: auto; color: var(--td-text-color-primary); }
+    h2 > :first-child { color: var(--td-brand-color); }
     .header-actions-lite {
       max-width: 100%;
       flex-wrap: wrap;
@@ -322,7 +330,7 @@
 }
 .resource-favorite-button() {
   position: absolute;
-  top: 12px;
+  top: 25px;
   right: 38px;
   display: flex;
   align-items: center;

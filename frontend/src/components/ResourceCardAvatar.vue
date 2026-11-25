@@ -1,6 +1,6 @@
 <template>
   <span class="resource-card-avatar" aria-hidden="true">
-    <span v-if="emoji" class="avatar-emoji">{{ emoji }}</span>
+    <span v-if="showEmoji" class="avatar-emoji">{{ emoji }}</span>
     <ResourceIcon v-else-if="kind === 'agent'" type="agent" :size="16" />
     <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -12,9 +12,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import ResourceIcon from '@/components/icons/ResourceIcon.vue'
 
-defineProps<{ kind: 'agent' | 'space'; emoji?: string }>()
+const props = defineProps<{ kind: 'agent' | 'space'; emoji?: string }>()
+const showEmoji = computed(() => !!props.emoji && /\p{Extended_Pictographic}/u.test(props.emoji))
 </script>
 
 <style scoped lang="less">
@@ -30,7 +32,7 @@ defineProps<{ kind: 'agent' | 'space'; emoji?: string }>()
   transition: transform var(--app-motion-slow) cubic-bezier(.2, .8, .2, 1), color var(--app-motion-fast);
   svg { display: block; overflow: visible; flex-shrink: 0; }
 }
-.avatar-emoji { font-size: var(--app-text-2xl); line-height: 1; }
+.avatar-emoji { max-width: 20px; overflow: hidden; white-space: nowrap; font-size: var(--app-text-2xl); line-height: 1; }
 .space-member-left, .space-member-right, .space-member-center {
   transform-box: fill-box;
   transform-origin: center bottom;

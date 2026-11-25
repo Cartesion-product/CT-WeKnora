@@ -7,7 +7,7 @@ export default {
     invalidConfig: 'Check video processing settings: frame interval must be 1–60 seconds and maximum frames 1–300.',
     ocrChineseEnglish: 'Chinese + English', ocrChinese: 'Chinese', ocrEnglish: 'English',
     visualDescription: 'Describe visuals', transcription: 'Transcribe speech', relatedVideos: 'Related videos',
-    tab: 'Video', retry: 'Retry', loadFailed: 'Could not load video details', ingestDisabled: 'Video upload is disabled; skipped {count} MP4 file(s)',
+    tab: 'Video', play: 'Play video', playFrom: 'Play from', retry: 'Retry', loadFailed: 'Could not load video details', ingestDisabled: 'Video upload is disabled; skipped {count} MP4 file(s)',
     playbackFailed: 'Video playback is unavailable', loadingPlayback: 'Loading video',
     duration: 'Duration', segments: 'Segments', noSegments: 'No segments yet', loadMore: 'Load more segments',
     seek: 'Jump to this time', frame: 'Frame',
@@ -3493,6 +3493,7 @@ export default {
     }
   },
   createChat: {
+    description: 'Choose a knowledge base or agent to explore your sources and find grounded answers.',
     title: 'Ask your knowledge base',
     newSessionTitle: 'New Session',
     openProject: 'Select project',

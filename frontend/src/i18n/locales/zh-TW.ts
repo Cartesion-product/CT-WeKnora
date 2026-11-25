@@ -7,7 +7,7 @@ export default {
     invalidConfig: '請檢查影片解析設定：擷取間隔為 1–60 秒，最大影格數為 1–300。',
     ocrChineseEnglish: '中文 + 英文', ocrChinese: '中文', ocrEnglish: '英文',
     visualDescription: '產生畫面描述', transcription: '語音轉寫', relatedVideos: '相關影片',
-    tab: '影片', retry: '重試', loadFailed: '無法載入影片詳情', ingestDisabled: '影片上傳未啟用，已略過 {count} 個 MP4 檔案',
+    tab: '影片', play: '播放影片', playFrom: '從此處播放', retry: '重試', loadFailed: '無法載入影片詳情', ingestDisabled: '影片上傳未啟用，已略過 {count} 個 MP4 檔案',
     playbackFailed: '影片暫時無法播放', loadingPlayback: '正在載入影片',
     duration: '時長', segments: '片段', noSegments: '暫無片段', loadMore: '載入更多片段',
     seek: '跳至此時間', frame: '關鍵影格',
@@ -6452,6 +6452,7 @@ export default {
     }
   },
   createChat: {
+    description: '選擇知識庫或智慧體，檢索資料、理解內容，讓答案有據可循。',
     title: 'Hi，我是识渊，讓你的知識觸手可及',
     newSessionTitle: '新會話',
     openProject: '選擇專案',

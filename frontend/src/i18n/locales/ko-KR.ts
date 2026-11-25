@@ -7,7 +7,7 @@ export default {
     invalidConfig: '동영상 분석 설정을 확인하세요. 프레임 간격은 1–60초, 최대 프레임 수는 1–300이어야 합니다.',
     ocrChineseEnglish: '중국어 + 영어', ocrChinese: '중국어', ocrEnglish: '영어',
     visualDescription: '영상 설명 생성', transcription: '음성 전사', relatedVideos: '관련 동영상',
-    tab: '동영상', retry: '다시 시도', loadFailed: '동영상 세부 정보를 불러올 수 없습니다', ingestDisabled: '동영상 업로드가 비활성화되어 MP4 파일 {count}개를 건너뛰었습니다',
+    tab: '동영상', play: '동영상 재생', playFrom: '여기서 재생', retry: '다시 시도', loadFailed: '동영상 세부 정보를 불러올 수 없습니다', ingestDisabled: '동영상 업로드가 비활성화되어 MP4 파일 {count}개를 건너뛰었습니다',
     playbackFailed: '동영상을 재생할 수 없습니다', loadingPlayback: '동영상 불러오는 중',
     duration: '길이', segments: '구간', noSegments: '아직 구간이 없습니다', loadMore: '구간 더 불러오기',
     seek: '이 시간으로 이동', frame: '프레임',
@@ -6451,6 +6451,7 @@ export default {
     }
   },
   createChat: {
+    description: '지식 베이스나 에이전트를 선택하고 자료에서 근거 있는 답변을 찾아보세요.',
     title: '안녕하세요, SenseDeep입니다 — 당신의 지식을 손끝에',
     newSessionTitle: '새 세션',
     openProject: '프로젝트 선택',

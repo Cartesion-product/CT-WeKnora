@@ -1,6 +1,8 @@
 <template>
-    <div class="main" ref="dropzone" :style="{ '--sidebar-width': `${uiStore.sidebarDisplayWidth}px` }">
+    <div class="main sensedeep-workspace" ref="dropzone" :style="{ '--sidebar-width': `${uiStore.sidebarDisplayWidth}px`, '--sd-ocean-poster': oceanPoster }">
         <Menu></Menu>
+        <button v-if="mobileSidebarOpen" class="mobile-sidebar-scrim" type="button"
+            :aria-label="t('menu.collapseSidebar')" @click="uiStore.sidebarCollapsed = true" />
         <div v-if="isRouterAlive" class="platform-route-outlet">
             <RouterView />
         </div>
@@ -18,13 +20,12 @@
         <GlobalCommandPalette />
         <!-- 知识库文件上传进度浮层：上传队列放在 store 里，切换页面不中断 -->
         <UploadTasksPanel />
-        <!-- 带遮罩层的新手引导：首次进入自动开启，可从用户菜单顶部昵称旁帮助按钮重新打开 -->
-        <NewUserGuide />
     </div>
 </template>
 <script setup lang="ts">
 import Menu from '@/components/menu.vue'
-import { ref, onMounted, onUnmounted, nextTick, provide, watch } from 'vue';
+import '@/assets/theme/workspace.less'
+import { ref, computed, onMounted, onUnmounted, nextTick, provide, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 import UploadMask from '@/components/upload-mask.vue'
 import Settings from '@/views/settings/Settings.vue'
@@ -33,7 +34,6 @@ import AssistantPanel from '@/components/assistant/AssistantPanel.vue'
 import AssistantLauncher from '@/components/assistant/AssistantLauncher.vue'
 import AssistantPageBridge from '@/components/assistant/AssistantPageBridge.vue'
 import UploadTasksPanel from '@/components/upload-tasks/UploadTasksPanel.vue'
-import NewUserGuide from '@/components/NewUserGuide.vue'
 import { useCommandPaletteStore } from '@/stores/commandPalette'
 import { useChatResourcesStore } from '@/stores/chatResources'
 import { useUIStore } from '@/stores/ui'
@@ -43,9 +43,26 @@ import { useI18n } from 'vue-i18n'
 import { collectDroppedFiles } from './collectDroppedFiles'
 
 const route = useRoute();
+const oceanPoster = `url("${import.meta.env.BASE_URL}backgrounds/abyssal-poster.webp")`;
+document.documentElement.dataset.workspaceTheme = 'ocean';
 const router = useRouter();
 const commandPaletteStore = useCommandPaletteStore();
 const uiStore = useUIStore();
+const isNarrowViewport = ref(false)
+const mobileSidebarOpen = computed(() => isNarrowViewport.value && !uiStore.sidebarCollapsed)
+let desktopSidebarCollapsed = uiStore.sidebarCollapsed
+let narrowViewportQuery: MediaQueryList | undefined
+function syncSidebarViewport() {
+    const narrow = narrowViewportQuery?.matches ?? false
+    if (narrow === isNarrowViewport.value) return
+    if (narrow) {
+        desktopSidebarCollapsed = uiStore.sidebarCollapsed
+        uiStore.sidebarCollapsed = true
+    } else {
+        uiStore.sidebarCollapsed = desktopSidebarCollapsed
+    }
+    isNarrowViewport.value = narrow
+}
 let ismask = ref(false)
 const { t } = useI18n();
 
@@ -200,6 +217,9 @@ const handleGlobalDrop = async (event: DragEvent) => {
 
 // 组件挂载时添加全局事件监听器
 onMounted(() => {
+    narrowViewportQuery = window.matchMedia('(max-width: 720px)')
+    syncSidebarViewport()
+    narrowViewportQuery.addEventListener('change', syncSidebarViewport)
     document.addEventListener('dragenter', handleGlobalDragEnter, true);
     document.addEventListener('dragover', handleGlobalDragOver, true);
     document.addEventListener('dragleave', handleGlobalDragLeave, true);
@@ -222,6 +242,9 @@ onMounted(() => {
 watch(() => route.query.cmdk, () => {
     maybeOpenCmdkFromRoute()
 })
+watch(() => route.fullPath, () => {
+    if (isNarrowViewport.value) uiStore.sidebarCollapsed = true
+})
 
 function maybeOpenCmdkFromRoute() {
     if (!('cmdk' in route.query)) return
@@ -235,6 +258,8 @@ function maybeOpenCmdkFromRoute() {
 
 // 组件卸载时移除全局事件监听器
 onUnmounted(() => {
+    delete document.documentElement.dataset.workspaceTheme;
+    narrowViewportQuery?.removeEventListener('change', syncSidebarViewport)
     document.removeEventListener('dragenter', handleGlobalDragEnter, true);
     document.removeEventListener('dragover', handleGlobalDragOver, true);
     document.removeEventListener('dragleave', handleGlobalDragLeave, true);
@@ -256,10 +281,9 @@ onUnmounted(() => {
     align-items: stretch;
     width: 100%;
     height: 100%;
-    min-width: 600px;
+    min-width: 0;
     min-height: 0;
-    /* 统一整页背景，让左侧菜单与右侧内容区视觉连贯 */
-    background: var(--td-bg-color-container);
+    background: var(--td-bg-color-page);
 }
 
 /* 右侧路由区：占满剩余宽度与整列高度，并把 min-height:0 传给子页面以便内部 flex 滚动 */
@@ -270,6 +294,27 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    background: var(--td-bg-color-page);
+}
+
+.mobile-sidebar-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    border: 0;
+    background: rgba(4, 27, 31, 0.38);
+    cursor: pointer;
+}
+
+@media (max-width: 720px) {
+    .main > .aside_box:not(.aside_box--collapsed) {
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 41;
+        height: 100dvh;
+        width: min(var(--sidebar-width), calc(100vw - 48px));
+        box-shadow: 8px 0 28px rgba(4, 27, 31, 0.18);
+    }
 }
 
 .upload-mask {

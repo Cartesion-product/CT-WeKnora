@@ -1,14 +1,6 @@
 <template>
   <div class="artifact-library">
-    <div class="header" style="--wails-draggable: drag">
-      <div class="header-title" style="--wails-draggable: drag">
-        <h2 style="--wails-draggable: drag">
-          <ResourceIcon type="artifact" :size="24" />
-          {{ $t('artifactLibrary.title') }}
-        </h2>
-        <p class="header-subtitle" style="--wails-draggable: drag">{{ $t('artifactLibrary.subtitle') }}</p>
-      </div>
-    </div>
+    <WorkspaceHeading :title="$t('artifactLibrary.title')" :subtitle="$t('artifactLibrary.subtitle')" section="04 / Artifacts" />
 
     <div class="toolbar">
       <div class="category-tabs" role="tablist" :aria-label="$t('artifactLibrary.typeFilter')">
@@ -217,6 +209,7 @@
 </template>
 
 <script setup lang="ts">
+import WorkspaceHeading from '@/components/WorkspaceHeading.vue'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

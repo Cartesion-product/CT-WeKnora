@@ -1,14 +1,8 @@
 <template>
   <div class="agent-list-container" :class="{ 'is-lite': authStore.isLiteMode }">
     <div class="agent-list-content">
-      <div class="header" style="--wails-draggable: drag">
-        <div class="header-title" style="--wails-draggable: drag">
-          <div class="title-row" style="--wails-draggable: drag">
-            <h2 style="--wails-draggable: drag">
-              <ResourceIcon type="agent" :size="24" />
-              {{ $t('agent.title') }}
-            </h2>
-            <div class="header-actions" :class="{ 'header-actions-lite': authStore.isLiteMode }" style="--wails-draggable: no-drag">
+      <WorkspaceHeading :title="$t('agent.title')" :subtitle="$t('agent.subtitle')" section="02 / Agents">
+        <div class="header-actions" :class="{ 'header-actions-lite': authStore.isLiteMode }" style="--wails-draggable: no-drag">
               <ResourceListToolbar v-if="authStore.isLiteMode" hide-scopes v-model="spaceSelection" v-model:query="keyword" />
               <ResourceSortControl v-model="selectedResourceSort" />
               <t-tooltip v-if="authStore.hasRole('contributor')" :content="$t('agent.createAgent')" placement="bottom">
@@ -31,10 +25,7 @@
                 </t-button>
               </t-tooltip>
             </div>
-          </div>
-          <p class="header-subtitle" style="--wails-draggable: drag">{{ $t('agent.subtitle') }}</p>
-        </div>
-      </div>
+      </WorkspaceHeading>
       <ResourceListToolbar v-if="!authStore.isLiteMode" v-model="spaceSelection" v-model:query="keyword" :count-all="allAgentsCount"
       :count-mine="agents.length" :count-by-org="effectiveSharedCountByOrg" :count-favorites="agentFavoritesCount"
       :count-recents="agentRecentsCount" />
@@ -729,12 +720,11 @@
       :readOnly="editorMode === 'edit' && editingAgent != null && !canManageAgent(editingAgent as AgentWithUI)"
       @update:visible="editorVisible = $event" @success="handleEditorSuccess" />
 
-    <TenantModelsGuide :when="showAgentTenantModelsGuide" variant="agent" />
-    <ContextualGuide tour="agentList" :when="showAgentListContextualGuide" />
   </div>
 </template>
 
 <script setup lang="ts">
+import WorkspaceHeading from '@/components/WorkspaceHeading.vue'
 import { useAssistantDataChange } from '@/utils/assistantDataChange'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -755,9 +745,7 @@ import AgentEditorModal from './AgentEditorModal.vue'
 import AssistantCreateDialog from '@/components/assistant/AssistantCreateDialog.vue'
 import { useAssistantStore } from '@/stores/assistant'
 import { useAssistantPageContext } from '@/composables/useAssistantPageContext'
-import ContextualGuide from '@/components/ContextualGuide.vue'
-import TenantModelsGuide from '@/components/TenantModelsGuide.vue'
-import { focusAgentEditorSection, markContextualGuideDone } from '@/config/contextualGuides'
+import { focusAgentEditorSection } from '@/config/contextualGuides'
 import { useTenantModelReadiness } from '@/composables/useTenantModelReadiness'
 import { useUIStore } from '@/stores/ui'
 import ResourceCardAvatar from '@/components/ResourceCardAvatar.vue'
@@ -786,7 +774,7 @@ const assistantCreateVisible = ref(false)
 const uiStore = useUIStore()
 const orgStore = useOrganizationStore()
 const chatResources = useChatResourcesStore()
-const { loaded: modelsReadyLoaded, isReadyForAgent } = useTenantModelReadiness()
+const { isReadyForAgent } = useTenantModelReadiness()
 const selectedResourceSort = ref<ResourceSortValue>(DEFAULT_RESOURCE_SORT)
 
 interface AgentWithUI extends CustomAgent {
@@ -1049,22 +1037,6 @@ const editorInitialSection = ref<string>('basic')
 const editorInitialHighlightField = ref<string>('')
 /** 当前打开三点菜单的卡片 agent.id（用于受控弹出层，避免 computed 项无持久引用导致菜单不响应） */
 const openMoreAgentId = ref<string | null>(null)
-
-const showAgentListEmpty = computed(() => {
-  if (loading.value || keyword.value.trim()) return false
-  if (!authStore.hasRole('contributor')) return false
-  if (spaceSelection.value === 'all' && filteredAgents.value.length === 0) return true
-  if (spaceSelection.value === 'mine' && agents.value.length === 0) return true
-  return false
-})
-
-const showAgentTenantModelsGuide = computed(
-  () => modelsReadyLoaded.value && showAgentListEmpty.value && !isReadyForAgent.value,
-)
-
-const showAgentListContextualGuide = computed(
-  () => showAgentListEmpty.value && isReadyForAgent.value && !editorVisible.value,
-)
 
 const applyAgentListData = (res: { data: CustomAgent[]; disabled_own_agent_ids: string[] }) => {
   const disabledOwnIds = res.disabled_own_agent_ids || []
@@ -1549,7 +1521,6 @@ const handleCreateAgent = () => {
     uiStore.openSettings('models')
     return
   }
-  markContextualGuideDone('agentList')
   openCreateModal()
 }
 

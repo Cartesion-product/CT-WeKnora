@@ -1867,18 +1867,13 @@
     />
   </SettingDrawer>
 
-  <AgentCreateContextualGuide :when="visible && editorMode === 'create'" :is-agent-mode="isAgentMode" />
 </template>
 
 <script setup lang="ts">
 import { useAssistantDataChange } from '@/utils/assistantDataChange';
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import AgentCreateContextualGuide from '@/components/AgentCreateContextualGuide.vue';
-import {
-  AGENT_EDITOR_FOCUS_SECTION_EVENT,
-  markContextualGuideDone,
-} from '@/config/contextualGuides';
+import { AGENT_EDITOR_FOCUS_SECTION_EVENT } from '@/config/contextualGuides';
 import { useI18n } from 'vue-i18n';
 import { selectInitialModelId } from '@/utils/modelDefaults';
 import { hydrateAgentPromptRefs, serializeAgentPrompts } from '@/utils/agentPromptTemplates';
@@ -5130,7 +5125,6 @@ const handleSave = async () => {
         keepAllowedToolsUnset.value = false;
       }
       modalShell.markClean();
-      markContextualGuideDone('agentCreate')
       currentSection.value = 'basic';
       void loadAgentIntegrationCounts(created.id);
       MessagePlugin.success(t('agent.messages.created'));

@@ -1,14 +1,8 @@
 <template>
   <div class="org-list-container">
     <div class="org-list-content">
-      <div class="header" style="--wails-draggable: drag">
-        <div class="header-title" style="--wails-draggable: drag">
-          <div class="title-row" style="--wails-draggable: drag">
-            <h2 style="--wails-draggable: drag">
-              <ResourceIcon type="organization" :size="24" />
-              {{ $t('organization.title') }}
-            </h2>
-            <div class="header-actions" style="--wails-draggable: no-drag">
+      <WorkspaceHeading :title="$t('organization.title')" :subtitle="$t('organization.subtitle')" section="03 / Shared spaces">
+        <div class="header-actions" style="--wails-draggable: no-drag">
               <ResourceSortControl v-model="selectedResourceSort" />
               <t-tooltip :content="canManageOrg ? $t('organization.joinOrg') : noPermissionTip" placement="bottom">
                 <t-button variant="text" theme="default" size="small" class="header-action-btn"
@@ -20,16 +14,12 @@
               <t-tooltip :content="canManageOrg ? $t('organization.createOrg') : noPermissionTip" placement="bottom">
                 <t-button variant="text" theme="default" size="small" class="header-action-btn"
                   style="--wails-draggable: no-drag" :disabled="!canManageOrg" @click="handleCreateOrganization">
-                  <template #icon><img src="@/assets/img/organization-green.svg" class="org-create-icon" alt=""
-                      aria-hidden="true" /></template>
+                  <template #icon><ResourceIcon type="organization" :size="16" /></template>
                 {{ $t('organization.createOrg') }}
                 </t-button>
               </t-tooltip>
             </div>
-          </div>
-          <p class="header-subtitle" style="--wails-draggable: drag">{{ $t('organization.subtitle') }}</p>
-        </div>
-      </div>
+      </WorkspaceHeading>
       <ResourceListToolbar mode="organization" :model-value="spaceSelection" @update:model-value="value => spaceSelection = value === 'created' || value === 'joined' ? value : 'all'" v-model:query="keyword" :count-all="organizations.length"
       :count-created="createdCount" :count-joined="joinedCount" />
       <div class="org-list-main">
@@ -428,6 +418,7 @@
 </template>
 
 <script setup lang="ts">
+import WorkspaceHeading from '@/components/WorkspaceHeading.vue'
 import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { MessagePlugin } from 'tdesign-vue-next'

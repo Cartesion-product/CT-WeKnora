@@ -30,8 +30,9 @@ const thin = (data, stride, step) => {
   for (let i = 0, j = 0; i < data.length; i += stride * step, j += stride) result.set(data.subarray(i, i + stride), j);
   return result;
 };
-Wd.fish = thin(Wd.fish, 8, 4);
-Wd.mantas = thin(Wd.mantas, 8, 3);
+// Five fish from the school in front of the fixed camera, plus its central manta.
+Wd.fish = Float32Array.from([0, 104, 208, 312, 416].flatMap(i => Array.from(Wd.fish.subarray(i * 8, i * 8 + 8))));
+Wd.mantas = Wd.mantas.slice(0, 8);
 Wd.bubbles = thin(Wd.bubbles, 8, 3);
 Wd.snow = thin(Wd.snow, 4, 4);
 Wd.glints = thin(Wd.glints, 8, 2);
@@ -45,7 +46,7 @@ const WATER = LV > 1 ? 256 : 512, RAYN = LV > 1 ? 12 : 34;
   const setup = `
 const canvas = document.getElementById('c');
 const say = () => new Promise(resolve => setTimeout(resolve, 0));
-let stopped = false, raf = 0;
+let stopped = false, capturing = false, raf = 0;
 if (!navigator.gpu) throw new Error('WebGPU unavailable');
 const adapter = await navigator.gpu.requestAdapter({powerPreference: 'low-power'});
 if (!adapter) throw new Error('WebGPU adapter unavailable');
@@ -69,7 +70,7 @@ report('ready');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 let last = 0, samples = 0, elapsed = 0;
 function frame(now) {
-  if (stopped || document.hidden || motion.matches) return;
+  if (stopped || capturing || document.hidden || motion.matches) return;
   raf = requestAnimationFrame(frame);
   if (now - last < 1000 / 24) return;
   const dt = last ? Math.min((now - last) / 1000, .15) : 0;
@@ -90,6 +91,14 @@ function resume() {
 document.addEventListener('visibilitychange', resume);
 motion.addEventListener('change', resume);
 addEventListener('resize', () => { if (!stopped) { resize(); render(); } });
+window.captureOceanFrame = async time => {
+  capturing = true;
+  cancelAnimationFrame(raf);
+  F[TIME] = time;
+  render();
+  await Q.onSubmittedWorkDone();
+  return true;
+};
 resume();
 `
   const code = [quality, read('source/src/math.js'), read('source/src/shaders.js'), read('source/src/world.js'), setup, main, loop].join('\n')

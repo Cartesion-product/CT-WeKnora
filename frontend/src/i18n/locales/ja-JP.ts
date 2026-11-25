@@ -7,7 +7,7 @@ export default {
     invalidConfig: '動画の解析設定を確認してください。抽出間隔は 1–60 秒、最大フレーム数は 1–300 です。',
     ocrChineseEnglish: '中国語 + 英語', ocrChinese: '中国語', ocrEnglish: '英語',
     visualDescription: '映像を説明', transcription: '音声を文字起こし', relatedVideos: '関連動画',
-    tab: '動画', retry: '再試行', loadFailed: '動画の詳細を読み込めません', ingestDisabled: '動画のアップロードは無効です。MP4 を {count} 件スキップしました',
+    tab: '動画', play: '動画を再生', playFrom: 'ここから再生', retry: '再試行', loadFailed: '動画の詳細を読み込めません', ingestDisabled: '動画のアップロードは無効です。MP4 を {count} 件スキップしました',
     playbackFailed: '動画を再生できません', loadingPlayback: '動画を読み込み中',
     duration: '長さ', segments: 'セグメント', noSegments: 'セグメントはまだありません', loadMore: 'セグメントをさらに読み込む',
     seek: 'この時刻に移動', frame: 'フレーム',
@@ -3493,6 +3493,7 @@ export default {
     }
   },
   createChat: {
+    description: 'ナレッジベースやエージェントを選び、資料から根拠のある答えを見つけましょう。',
     title: 'こんにちは、SenseDeepです。あなたのナレッジを、すぐそばに',
     newSessionTitle: '新しいセッション',
     openProject: 'プロジェクトを選択',

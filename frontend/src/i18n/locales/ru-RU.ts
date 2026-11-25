@@ -7,7 +7,7 @@ export default {
     invalidConfig: 'Проверьте настройки видео: интервал кадров 1–60 секунд, максимум кадров 1–300.',
     ocrChineseEnglish: 'Китайский + английский', ocrChinese: 'Китайский', ocrEnglish: 'Английский',
     visualDescription: 'Описывать изображение', transcription: 'Расшифровывать речь', relatedVideos: 'Связанные видео',
-    tab: 'Видео', retry: 'Повторить', loadFailed: 'Не удалось загрузить сведения о видео', ingestDisabled: 'Загрузка видео отключена; пропущено файлов MP4: {count}',
+    tab: 'Видео', play: 'Воспроизвести видео', playFrom: 'Воспроизвести с', retry: 'Повторить', loadFailed: 'Не удалось загрузить сведения о видео', ingestDisabled: 'Загрузка видео отключена; пропущено файлов MP4: {count}',
     playbackFailed: 'Видео недоступно для воспроизведения', loadingPlayback: 'Загрузка видео',
     duration: 'Длительность', segments: 'Фрагменты', noSegments: 'Фрагментов пока нет', loadMore: 'Загрузить ещё фрагменты',
     seek: 'Перейти к этому времени', frame: 'Кадр',
@@ -6451,6 +6451,7 @@ export default {
     }
   },
   createChat: {
+    description: 'Выберите базу знаний или агента, чтобы найти ответы с опорой на ваши материалы.',
     title: 'Привет, я SenseDeep — ваши знания всегда под рукой',
     newSessionTitle: 'Новая сессия',
     openProject: 'Выбрать проект',

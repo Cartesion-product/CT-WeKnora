@@ -633,14 +633,11 @@
     </template>
   </SettingsModalShell>
 
-  <KbCreateContextualGuide :when="visible && editorMode === 'create'" :is-faq="isFAQ"
-    :needs-embedding="kbCreateNeedsEmbedding" />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import KbCreateContextualGuide from '@/components/KbCreateContextualGuide.vue'
-import { KB_EDITOR_FOCUS_SECTION_EVENT, markContextualGuideDone } from '@/config/contextualGuides'
+import { KB_EDITOR_FOCUS_SECTION_EVENT } from '@/config/contextualGuides'
 import { MessagePlugin, DialogPlugin } from 'tdesign-vue-next'
 import { useModalShell } from '@/composables/useModalShell'
 import SettingsModalShell from '@/components/SettingsModalShell.vue'
@@ -931,12 +928,6 @@ const embeddingTakesImages = computed(() => {
   return !model || !!model.capabilities?.input?.includes('image')
 })
 const isFAQ = computed(() => formData.value?.type === 'faq')
-
-const kbCreateNeedsEmbedding = computed(() => {
-  if (!formData.value || formData.value.type === 'faq') return false
-  const s = formData.value.indexingStrategy
-  return Boolean(s?.vectorEnabled || s?.keywordEnabled)
-})
 
 const applyDefaultModelsIfEmpty = () => {
   if (!formData.value || editorMode.value !== 'create') return
@@ -1814,7 +1805,6 @@ const doSubmit = async () => {
       currentSection.value = 'basic'
       await loadKBData(createdKbId)
       MessagePlugin.success(t('knowledgeEditor.messages.createSuccess'))
-      markContextualGuideDone('kbCreate')
       emit('success', createdKbId)
     } else {
       // 编辑模式：分别更新基本信息和配置

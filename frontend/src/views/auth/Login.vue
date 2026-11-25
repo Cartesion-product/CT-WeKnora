@@ -821,10 +821,9 @@ onMounted(async () => {
   gap: 7px;
   padding: 9px 15px;
   border-radius: 4px;
-  background: rgba(5, 32, 41, .4);
+  background: rgba(5, 32, 41, .56);
   border: 1px solid var(--td-component-stroke);
   color: #e6f5f0;
-  backdrop-filter: blur(10px);
   text-decoration: none;
   font-size: var(--app-text-md);
   font-weight: 600;
@@ -924,8 +923,7 @@ onMounted(async () => {
 }
 
 .form-card {
-  background: rgba(4, 27, 37, .36);
-  backdrop-filter: blur(12px);
+  background: rgba(4, 27, 37, .52);
   border-radius: 16px;
   padding: 40px;
   box-shadow: 0 20px 60px rgba(0, 15, 24, .16);

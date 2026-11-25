@@ -1,7 +1,7 @@
 <template>
     <div class="aside_box" :class="{ 'aside_box--collapsed': uiStore.sidebarCollapsed, 'aside_box--resizing': uiStore.sidebarResizing }">
         <!-- 展开时：Logo + 搜索/折叠按钮同行 -->
-        <div class="logo_row" v-if="!uiStore.sidebarCollapsed">
+        <div class="logo_row" v-if="!uiStore.sidebarCollapsed" :style="{ '--sidebar-ocean-poster': sidebarOceanPoster }">
             <div class="logo_box" @click="router.push('/platform/knowledge-bases')" style="cursor: pointer;">
                 <BrandMark />
                 <sup v-if="isLiteEdition" class="lite-badge">Lite</sup>
@@ -23,7 +23,7 @@
                         <img class="header-icon-img" :src="getImgSrc('search.svg')" alt="">
                     </div>
                 </t-tooltip>
-                <div class="sidebar-toggle" @click="uiStore.toggleSidebar" :title="t('menu.collapseSidebar')">
+                <div class="sidebar-toggle" @click="toggleSidebarForViewport" :title="t('menu.collapseSidebar')">
                     <svg viewBox="0 0 20 20" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="1.5" y="1.5" width="17" height="17" rx="3" stroke="currentColor" stroke-width="1.5" />
                         <line x1="7.5" y1="1.5" x2="7.5" y2="18.5" stroke="currentColor" stroke-width="1.5" />
@@ -35,7 +35,7 @@
         </div>
         <!-- 折叠时：展开按钮 -->
         <t-tooltip v-else :content="t('menu.expandSidebar')" placement="right">
-            <div class="menu_item sidebar-toggle-item" @click="uiStore.toggleSidebar">
+            <div class="menu_item sidebar-toggle-item" @click="toggleSidebarForViewport">
                 <div class="menu_item-box">
                     <div class="menu_icon">
                         <svg class="icon icon--toggle" viewBox="0 0 20 20" width="16" height="16" fill="none"
@@ -86,15 +86,19 @@
                         :label="assistantName" :active="assistantStore.visible" @click="assistantStore.toggle()" />
                 </t-tooltip>
             </div>
+            <div class="sidebar-section-label" v-if="!uiStore.sidebarCollapsed" aria-hidden="true">SENSEDEEP<span>WORKSPACE</span></div>
             <div class="menu_box" :class="{ 'menu_box--sticky': item.children && !uiStore.sidebarCollapsed }"
                 v-for="(item, index) in topMenuItems" :key="index">
                 <t-tooltip :content="item.title" placement="right" :disabled="!uiStore.sidebarCollapsed">
-                    <div @click="handleMenuClick(item.path)" @mouseenter="mouseenteMenu(item.path)"
+                    <div role="link" tabindex="0" :aria-label="item.title" :aria-current="isMenuItemActive(item.path) ? 'page' : undefined"
+                        @keydown.enter="handleMenuClick(item.path)" @keydown.space.prevent="handleMenuClick(item.path)"
+                        @click="handleMenuClick(item.path)" @mouseenter="mouseenteMenu(item.path)"
                         @mouseleave="mouseleaveMenu(item.path)" :data-guide="`nav-${item.path}`"
                         :class="['menu_item', item.childrenPath && item.childrenPath == currentpath ? 'menu_item_c_active' : isMenuItemActive(item.path) ? 'menu_item_active' : '']">
                         <div class="menu_item-box">
                             <div class="menu_icon" :class="`menu_icon--${item.icon}`">
-                                <img class="icon"
+                                <ResourceIcon v-if="menuResourceTypes[item.icon]" :type="menuResourceTypes[item.icon]" :size="18" />
+                                <img v-else class="icon"
                                     :src="getImgSrc(item.icon == 'zhishiku' ? knowledgeIcon : item.icon == 'agent' ? agentIcon : item.icon == 'artifact' ? artifactIcon : item.icon == 'automation' ? automationIcon : item.icon == 'toolbox' ? toolboxIcon : item.icon == 'organization' ? organizationIcon : item.icon == 'logout' ? logoutIcon : item.icon == 'setting' ? settingIcon : prefixIcon)"
                                     alt="">
                             </div>
@@ -287,11 +291,15 @@ import { useAssistantStore } from '@/stores/assistant';
 import AssistantButton from '@/components/assistant/AssistantButton.vue';
 import { MessagePlugin, DialogPlugin, Icon as TIcon } from "tdesign-vue-next";
 import UserMenu from '@/components/UserMenu.vue';
+import ResourceIcon from '@/components/icons/ResourceIcon.vue';
 import TenantSelector from '@/components/TenantSelector.vue';
 import { useI18n } from 'vue-i18n';
 import { useEditorResourcesStore } from '@/stores/editorResources';
 
 const chatResources = useChatResourcesStore();
+const menuResourceTypes: Record<string, 'knowledge' | 'agent' | 'artifact' | 'organization' | 'toolbox' | 'automation'> = {
+    zhishiku: 'knowledge', agent: 'agent', artifact: 'artifact', organization: 'organization', toolbox: 'toolbox', automation: 'automation',
+};
 const editorResources = useEditorResourcesStore();
 // Platform logos reused from IMChannelsOverviewPanel — keeps the session list
 // visually consistent with the channels admin view.
@@ -334,6 +342,14 @@ const toolboxPreview = computed(() => TOOLBOX_ITEMS.filter((item) => canAccessTo
 })));
 const orgStore = useOrganizationStore();
 const uiStore = useUIStore();
+const sidebarOceanPoster = `url("${import.meta.env.BASE_URL}backgrounds/abyssal-poster.webp")`
+function toggleSidebarForViewport() {
+    if (window.matchMedia('(max-width: 720px)').matches) {
+        uiStore.sidebarCollapsed = !uiStore.sidebarCollapsed;
+    } else {
+        uiStore.toggleSidebar();
+    }
+}
 const browserConnection = useBrowserConnectionStore();
 const browserStackStatus = computed(() => {
     if (!uiStore.sidebarBrowserStatus) return '';
@@ -1294,7 +1310,7 @@ const resizeSidebar = (delta: number, keyboard: boolean) => {
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--td-component-stroke);
-    box-shadow: 1px 0 0 rgba(0, 0, 0, 0.02);
+    box-shadow: 2px 0 12px color-mix(in srgb, var(--td-brand-color) 3%, transparent);
     transition: width 0.25s ease, min-width 0.25s ease;
     position: relative;
 
@@ -1354,10 +1370,21 @@ const resizeSidebar = (delta: number, keyboard: boolean) => {
         align-items: center;
         justify-content: space-between;
         // 保留侧栏顶部留白，让 Logo 和操作按钮与窗口顶边保持舒适间距
-        height: 39px;
-        margin: 0 0 4px;
+        height: 64px;
+        margin: -8px -4px 12px;
         flex-shrink: 0;
-        padding: 0 2px 0 var(--sidebar-inset-x);
+        padding: 8px 8px 0 14px;
+        box-sizing: border-box;
+        background:
+            linear-gradient(90deg, rgba(9, 46, 52, .94), rgba(15, 57, 61, .86)),
+            var(--sidebar-ocean-poster) center 48% / cover;
+        border-bottom: 1px solid rgba(225, 244, 238, .14);
+        --td-brand-color: #b9e4d5;
+        --td-text-color-primary: #f0f8f5;
+        --td-text-color-secondary: #bbd1cb;
+
+        .header-icon-img { filter: invert(1); opacity: .75; }
+        .header-icon-btn:hover .header-icon-img { opacity: 1; }
     }
 
     .sidebar-toggle {
@@ -1451,6 +1478,8 @@ const resizeSidebar = (delta: number, keyboard: boolean) => {
         flex-shrink: 0;
         display: flex;
         flex-direction: column;
+        padding-top: 6px;
+        border-top: 1px solid var(--td-component-stroke);
     }
 
     .menu_box {
@@ -1474,11 +1503,16 @@ const resizeSidebar = (delta: number, keyboard: boolean) => {
 
     .menu_item_active {
         border-radius: var(--app-radius-xs);
-        background: var(--td-bg-color-secondarycontainer) !important;
+        background: var(--td-brand-color-light) !important;
+        box-shadow: inset 2px 0 var(--td-brand-color);
 
         .menu_icon,
         .menu_title {
             color: var(--td-brand-color) !important;
+        }
+
+        .menu_icon img.icon {
+            filter: hue-rotate(28deg) saturate(.65) brightness(.7);
         }
     }
 
@@ -2049,7 +2083,7 @@ html[theme-mode="dark"] .aside_box .menu_item_c_active .menu_icon img.icon {
 
 // Active (green) icons should not be inverted
 html[theme-mode="dark"] .aside_box .menu_item_active .menu_icon img.icon {
-    filter: none;
+    filter: hue-rotate(28deg) saturate(.65) brightness(1.18);
     opacity: 1;
 }
 
